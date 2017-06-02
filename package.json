@@ -1,0 +1,26 @@
+{
+  "name": "node-browser-history",
+  "version": "0.0.7",
+  "description": "This application aims to retrieve browser history from all browsers on the user's computer. It will attempt to read from some common locations.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tance77/Node-Browser-History.git"
+  },
+  "keywords": [
+    "browser",
+    "history"
+  ],
+  "author": "Lance Thompson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tance77/Node-Browser-History/issues"
+  },
+  "homepage": "https://github.com/tance77/Node-Browser-History#readme",
+  "dependencies": {
+    "sqlite3": "^3.1.8"
+  }
+}
