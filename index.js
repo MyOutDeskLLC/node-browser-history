@@ -43,7 +43,8 @@ function getWindowsBrowserHistory(driveLetter, user) {
                 getChromeOperaHistory(browsers.opera, "Opera")
             ];
             Promise.all(getRecords).then(function (browserRecords) {
-                resolve(browserRecords);
+                resolve(records);
+                records = [];
             }).catch(function (dbReadError) {
                 reject(dbReadError);
             });
