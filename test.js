@@ -3,6 +3,7 @@ var getHistory = require("./index");
 
 function singleRun() {
     getHistory().then(function (stuff) {
+        console.log(stuff);
         console.log("Pass Single Run Test");
     }).catch(function (someError) {
         console.log("Fail Single Run Test");
@@ -23,4 +24,15 @@ function concurrencyLockTest() {
 }
 
 singleRun();
-concurrencyLockTest();
+//concurrencyLockTest();
+
+//var edge = require('edge');
+//
+//// The text in edge.func() is C# code
+//var helloWorld = edge.func('async (input) => { return input.ToString(); }');
+//
+//helloWorld('Hello World!', function (error, result) {
+//    if (error) throw error;
+//    console.log(result);
+//});
+
