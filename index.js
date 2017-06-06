@@ -13,52 +13,13 @@ function Record(title, dateVisited, url, browserName) {
     this.browserName  = browserName;
 }
 
-//Date should be ISO standard
-function getWindowsBrowserHistory(driveLetter, user) {
-    records = [];
-    return new Promise(function (resolve, reject) {
-        var basePath = path.join(driveLetter, "Users", user, "AppData");
-        var browsers = {
-            chrome:    path.join(basePath, "Local", "Google", "Chrome", "User Data", "Default", "History"),
-            firefox:   path.join(basePath, "Roaming", "Mozilla", "Firefox", "Profiles"),
-            opera:     path.join(basePath, "Roaming", "Opera Software", "Opera Stable", "History"),
-            ie:        path.join(basePath, "Local", "Microsoft", "Windows", "History", "History.IE5"),
-            edge:      path.join(basePath, "Local", "Packages"),
-            torch:     "",
-            maxthon:   "",
-            seamonkey: "",
-            avant:     ""
-        };
-        var getPaths = [
-            getFirefoxPath(browsers.firefox, user).then(function (foundPath) {
-                browsers.firefox = foundPath;
-            }),
-            getMicrosoftEdgePath(browsers.edge).then(function (foundPath) {
-                browsers.edge = foundPath;
-            })
-        ];
-
-        Promise.all(getPaths).then(function (values) {
-            var getRecords = [
-                getFireFoxHistory(browsers.firefox),
-                getChromeOperaHistory(browsers.chrome, "Google Chrome"),
-                getChromeOperaHistory(browsers.opera, "Opera")
-            ];
-            Promise.all(getRecords).then(function (browserRecords) {
-                resolve(records);
-            }).catch(function (dbReadError) {
-                reject(dbReadError);
-            });
-        }).catch(function (err) {
-            reject(err);
-        });
-    });
-
-}
 
 function getFireFoxHistory(firefoxPath) {
     return new Promise(function (resolve, reject) {
-        var newDbPath = path.join(process.env.TMP, uuidV4() + ".sqlite");
+        if (!firefoxPath || firefoxPath === "") {
+            return resolve(records);
+        }
+        var newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
 
         //Assuming the sqlite file is locked so lets make a copy of it
         var readStream  = fs.createReadStream(firefoxPath),
@@ -92,7 +53,10 @@ function getFireFoxHistory(firefoxPath) {
 
 function getChromeOperaHistory(dbPath, browserName) {
     return new Promise(function (resolve, reject) {
-        var newDbPath = path.join(process.env.TMP, uuidV4() + ".sqlite");
+        if (!dbPath || dbPath === "") {
+            return resolve(records);
+        }
+        var newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
 
         //Assuming the sqlite file is locked so lets make a copy of it
         var readStream  = fs.createReadStream(dbPath),
@@ -122,7 +86,43 @@ function getChromeOperaHistory(dbPath, browserName) {
             });
         });
     });
+}
 
+function getSafariHistory(dbPath, browserName) {
+    return new Promise(function (resolve, reject) {
+        if (!dbPath || dbPath === "") {
+            return resolve(records);
+        }
+        var newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+
+        //Assuming the sqlite file is locked so lets make a copy of it
+        var readStream  = fs.createReadStream(dbPath),
+            writeStream = fs.createWriteStream(newDbPath),
+            stream      = readStream.pipe(writeStream);
+
+        stream.on("finish", function () {
+            const db = new sqlite3.Database(newDbPath);
+            db.serialize(function () {
+                db.each("SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.id", function (err, row) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        records.push(new Record(row.title, row.visit_time, row.url, browserName));
+                    }
+                });
+            });
+
+            db.close(function () {
+                fs.unlink(newDbPath, function (err) {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(records);
+                });
+            });
+        });
+    });
 }
 
 function getFirefoxPath(firefoxPath, user) {
@@ -177,15 +177,92 @@ function getMicrosoftEdgePath(microsoftEdgePath) {
     });
 }
 
-var macBrowserHistoryLocations = function (user) {
-    this.chrome    = "";
-    this.firefox   = "";
-    this.safari    = "";
-    this.opera     = "";
-    this.vivaldi   = "";
-    this.seamonkey = "";
-    this.omniweb   = "";
-};
+function getWindowsBrowserHistory(driveLetter, user) {
+    records = [];
+    return new Promise(function (resolve, reject) {
+        var basePath = path.join(driveLetter, "Users", user, "AppData");
+        var browsers = {
+            chrome: path.join(basePath, "Local", "Google", "Chrome", "User Data", "Default", "History"),
+            firefox: path.join(basePath, "Roaming", "Mozilla", "Firefox", "Profiles"),
+            opera: path.join(basePath, "Roaming", "Opera Software", "Opera Stable", "History"),
+            ie: path.join(basePath, "Local", "Microsoft", "Windows", "History", "History.IE5"),
+            edge: path.join(basePath, "Local", "Packages"),
+            torch: "",
+            maxthon: "",
+            seamonkey: "",
+            avant: ""
+        };
+        var getPaths = [
+            getFirefoxPath(browsers.firefox, user).then(function (foundPath) {
+                browsers.firefox = null;
+            }),
+            getMicrosoftEdgePath(browsers.edge).then(function (foundPath) {
+                browsers.edge = null;
+            })
+        ];
+
+        Promise.all(getPaths).then(function (values) {
+            for (var browser in browsers) {
+                if (!fs.existsSync(browsers[browser])) {
+                    browsers[browser] = null;
+                }
+            }
+            var getRecords = [
+                getFireFoxHistory(browsers.firefox),
+                getChromeOperaHistory(browsers.chrome, "Google Chrome"),
+                getChromeOperaHistory(browsers.opera, "Opera")
+            ];
+            Promise.all(getRecords).then(function (browserRecords) {
+                resolve(records);
+            }).catch(function (dbReadError) {
+                reject(dbReadError);
+            });
+        }).catch(function (err) {
+            reject(err);
+        });
+    });
+}
+
+function getMacBrowserHistory(homeDirectory, user) {
+    records = [];
+    return new Promise(function (resolve, reject) {
+
+        var browsers = {
+            chrome: path.join(homeDirectory, "Library", "Application Support", "Google", "Chrome", "Default", "History"),
+            firefox: path.join(homeDirectory, "Library", "Application Support", "Firefox", "Profiles"),
+            safari: path.join(homeDirectory, "Library", "Safari", "History.db"),
+            opera: "",
+            vivaldi: "",
+            seamonkey: "",
+            omniweb: ""
+        };
+        var getPaths = [
+            getFirefoxPath(browsers.firefox, user).then(function (foundPath) {
+                browsers.firefox = null;
+            })
+        ];
+        Promise.all(getPaths).then(function (values) {
+            for (var browser in browsers) {
+                if (!fs.existsSync(browsers[browser])) {
+                    browsers[browser] = null;
+                }
+            }
+            var getRecords = [
+                getFireFoxHistory(browsers.firefox),
+                getChromeOperaHistory(browsers.chrome, "Google Chrome"),
+//            getChromeOperaHistory(browsers.opera, "Opera")
+                getSafariHistory(browsers.safari, "Safari")
+            ];
+            Promise.all(getRecords).then(function (browserRecords) {
+                resolve(records);
+            }).catch(function (dbReadError) {
+                reject(dbReadError);
+            });
+        }).catch(function (err) {
+            reject(err);
+        });
+    });
+}
 
 
 function getHistory() {
@@ -199,8 +276,11 @@ function getHistory() {
             });
         }
         else {
-            //mac
-            return "NO";
+            getMacBrowserHistory(process.env.HOME, process.env.USER).then(function (browserHistory) {
+                resolve(browserHistory);
+            }).catch(function (err) {
+                reject(err);
+            });
         }
     });
 
