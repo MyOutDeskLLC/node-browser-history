@@ -20,9 +20,6 @@ function concurrencyLockTest() {
             console.error(someError);
         });
     }
-    if (pass) {
-        console.log("Pass Concurrency Lock Test");
-    }
 }
 
 singleRun();

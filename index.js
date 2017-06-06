@@ -14,7 +14,7 @@ function Record(title, dateVisited, url, browserName) {
 }
 
 
-function getFireFoxHistory(firefoxPath) {
+function getFireFoxHistory(firefoxPath, browserName) {
     return new Promise(function (resolve, reject) {
         if (!firefoxPath || firefoxPath === "") {
             return resolve(records);
@@ -28,7 +28,6 @@ function getFireFoxHistory(firefoxPath) {
 
         stream.on("finish", function () {
             const db          = new sqlite3.Database(newDbPath);
-            const browserName = "Mozilla Firefox";
             db.serialize(function () {
                 db.each("SELECT title, last_visit_date, url from moz_places", function (err, row) {
                     if (err) {
@@ -51,7 +50,7 @@ function getFireFoxHistory(firefoxPath) {
     });
 }
 
-function getChromeOperaHistory(dbPath, browserName) {
+function getStandardHistory(dbPath, browserName) {
     return new Promise(function (resolve, reject) {
         if (!dbPath || dbPath === "") {
             return resolve(records);
@@ -194,10 +193,10 @@ function getWindowsBrowserHistory(driveLetter, user) {
         };
         var getPaths = [
             getFirefoxPath(browsers.firefox, user).then(function (foundPath) {
-                browsers.firefox = null;
+                browsers.firefox = foundPath;
             }),
             getMicrosoftEdgePath(browsers.edge).then(function (foundPath) {
-                browsers.edge = null;
+                browsers.edge = foundPath;
             })
         ];
 
@@ -209,8 +208,8 @@ function getWindowsBrowserHistory(driveLetter, user) {
             }
             var getRecords = [
                 getFireFoxHistory(browsers.firefox),
-                getChromeOperaHistory(browsers.chrome, "Google Chrome"),
-                getChromeOperaHistory(browsers.opera, "Opera")
+                getStandardHistory(browsers.chrome, "Google Chrome"),
+                getStandardHistory(browsers.opera, "Opera")
             ];
             Promise.all(getRecords).then(function (browserRecords) {
                 resolve(records);
@@ -231,14 +230,16 @@ function getMacBrowserHistory(homeDirectory, user) {
             chrome: path.join(homeDirectory, "Library", "Application Support", "Google", "Chrome", "Default", "History"),
             firefox: path.join(homeDirectory, "Library", "Application Support", "Firefox", "Profiles"),
             safari: path.join(homeDirectory, "Library", "Safari", "History.db"),
-            opera: "",
-            vivaldi: "",
-            seamonkey: "",
-            omniweb: ""
+            opera: path.join(homeDirectory, "Library", "Application Support", "com.operasoftware.Opera", "History"),
+            vivaldi: path.join(homeDirectory, "Library", "Application Support", "Vivaldi", "Default", "History"),
+            seamonkey: path.join(homeDirectory, "Library", "Application Support", "SeaMonkey", "Profiles")
         };
         var getPaths = [
             getFirefoxPath(browsers.firefox, user).then(function (foundPath) {
-                browsers.firefox = null;
+                browsers.firefox = foundPath;
+            }),
+            getFirefoxPath(browsers.seamonkey, user).then(function (foundPath) {
+                browsers.seamonkey = foundPath;
             })
         ];
         Promise.all(getPaths).then(function (values) {
@@ -248,12 +249,15 @@ function getMacBrowserHistory(homeDirectory, user) {
                 }
             }
             var getRecords = [
-                getFireFoxHistory(browsers.firefox),
-                getChromeOperaHistory(browsers.chrome, "Google Chrome"),
-//            getChromeOperaHistory(browsers.opera, "Opera")
-                getSafariHistory(browsers.safari, "Safari")
+                getFireFoxHistory(browsers.firefox, "Mozilla Firefox"),
+                getStandardHistory(browsers.chrome, "Google Chrome"),
+                getStandardHistory(browsers.opera, "Opera"),
+                getSafariHistory(browsers.safari, "Safari"),
+                getStandardHistory(browsers.vivaldi, "Vivaldi"),
+                getFireFoxHistory(browsers.seamonkey, "SeaMonkey")
+
             ];
-            Promise.all(getRecords).then(function (browserRecords) {
+            Promise.all(getRecords).then(function () {
                 resolve(records);
             }).catch(function (dbReadError) {
                 reject(dbReadError);
