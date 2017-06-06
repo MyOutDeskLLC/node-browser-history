@@ -128,7 +128,7 @@ function getFirefoxPath(firefoxPath, user) {
     return new Promise(function (resolve, reject) {
         fs.readdir(firefoxPath, function (err, files) {
             if (err) {
-                reject(err);
+                resolve(null);
                 return;
             }
             for (var i = 0, j = 0; j < 2; i++) {
@@ -156,7 +156,7 @@ function getMicrosoftEdgePath(microsoftEdgePath) {
     return new Promise(function (resolve, reject) {
         fs.readdir(microsoftEdgePath, function (err, files) {
             if (err) {
-                reject(err);
+                resolve(null);
                 return;
             }
             for (var i = 0; i < files.length; i++) {
@@ -167,7 +167,7 @@ function getMicrosoftEdgePath(microsoftEdgePath) {
             }
             fs.readdir(microsoftEdgePath, function (err2, files2) {
                 if (err) {
-                    reject(err);
+                    resolve(null);
                 }
                 //console.log(path.join(microsoftEdgePath, files2[0], "DBStore", "spartan.edb"));
                 resolve(path.join(microsoftEdgePath, files2[0], "DBStore", "spartan.edb"));
