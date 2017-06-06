@@ -9,16 +9,14 @@ This module will gather browser history from common internet browsers.
 > Browsers Supported
 
 * Google Chrome
+* Internet Explorer (Coming Soon)
+* Microsoft Edge (Coming Soon)
 * Mozilla Firefox
 * Opera
 * Safari (Mac Only)
-* Seamonkey (Mac Only)
+* Seamonkey
+* Torch (Windows Only)
 * Vivaldi (Mac Only)
-* Internet Explorer (Coming Soon)
-* Microsoft Edge (Coming Soon)
-* Torch (Coming Soon)
-* Maxthon (Coming Soon)
-* Avant (Coming Soon)
 
 # How to Install
 
