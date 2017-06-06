@@ -1,4 +1,4 @@
-# npm-node-history
+# node-browser-history
 
 This module will gather browser history from common internet browsers.
 > Operating Systems Supported
