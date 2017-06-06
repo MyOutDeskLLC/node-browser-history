@@ -276,9 +276,7 @@ function getHistory() {
             });
         }
         else {
-//            console.log(process.env);
             getMacBrowserHistory(process.env.HOME, process.env.USER).then(function (browserHistory) {
-//                console.log(browserHistory);
                 resolve(browserHistory);
             }).catch(function (err) {
                 reject(err);
