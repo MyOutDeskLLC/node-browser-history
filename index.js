@@ -249,12 +249,12 @@ function getMacBrowserHistory(homeDirectory, user) {
                 }
             }
             var getRecords = [
-//                getFireFoxHistory(browsers.firefox, "Mozilla Firefox"),
-//                getStandardHistory(browsers.chrome, "Google Chrome"),
-//                getStandardHistory(browsers.opera, "Opera"),
-//                getSafariHistory(browsers.safari, "Safari"),
-//                getStandardHistory(browsers.vivaldi, "Vivaldi"),
-//                getFireFoxHistory(browsers.seamonkey, "SeaMonkey"),
+                getFireFoxHistory(browsers.firefox, "Mozilla Firefox"),
+                getStandardHistory(browsers.chrome, "Google Chrome"),
+                getStandardHistory(browsers.opera, "Opera"),
+                getSafariHistory(browsers.safari, "Safari"),
+                getStandardHistory(browsers.vivaldi, "Vivaldi"),
+                getFireFoxHistory(browsers.seamonkey, "SeaMonkey"),
 
             ];
             Promise.all(getRecords).then(function () {
