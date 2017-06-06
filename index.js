@@ -254,11 +254,10 @@ function getMacBrowserHistory(homeDirectory, user) {
                 getStandardHistory(browsers.opera, "Opera"),
                 getSafariHistory(browsers.safari, "Safari"),
                 getStandardHistory(browsers.vivaldi, "Vivaldi"),
-                getFireFoxHistory(browsers.seamonkey, "SeaMonkey"),
+                getFireFoxHistory(browsers.seamonkey, "SeaMonkey")
 
             ];
             Promise.all(getRecords).then(function () {
-                console.log(records);
                 resolve(records);
             }).catch(function (dbReadError) {
                 reject(dbReadError);
