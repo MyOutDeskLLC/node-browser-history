@@ -2,7 +2,8 @@
 
 const path    = require("path"),
       fs      = require("fs"),
-      sqlite3 = require("sqlite3").verbose();
+      sqlite3 = require("sqlite3").verbose(),
+      uuidV4  = require("uuid/v4");
 var records   = [];
 
 function Record(title, dateVisited, url, browserName) {
@@ -14,6 +15,7 @@ function Record(title, dateVisited, url, browserName) {
 
 //Date should be ISO standard
 function getWindowsBrowserHistory(driveLetter, user) {
+    records = [];
     return new Promise(function (resolve, reject) {
         var basePath = path.join(driveLetter, "Users", user, "AppData");
         var browsers = {
@@ -44,7 +46,6 @@ function getWindowsBrowserHistory(driveLetter, user) {
             ];
             Promise.all(getRecords).then(function (browserRecords) {
                 resolve(records);
-                records = [];
             }).catch(function (dbReadError) {
                 reject(dbReadError);
             });
@@ -57,54 +58,71 @@ function getWindowsBrowserHistory(driveLetter, user) {
 
 function getFireFoxHistory(firefoxPath) {
     return new Promise(function (resolve, reject) {
-        const db          = new sqlite3.Database(firefoxPath);
-        const browserName = "Mozilla Firefox";
-        db.all("SELECT title, last_visit_date, url from moz_places", function (err, rows) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                for (var i = 0; i < rows.length; i++) {
-                    records.push(new Record(rows[i].title, rows[i].last_visit_date, rows[i].url, browserName));
-                }
-                resolve(records);
-            }
+        var newDbPath = path.join(process.env.TMP, uuidV4() + ".sqlite");
+
+        //Assuming the sqlite file is locked so lets make a copy of it
+        var readStream  = fs.createReadStream(firefoxPath),
+            writeStream = fs.createWriteStream(newDbPath),
+            stream      = readStream.pipe(writeStream);
+
+        stream.on("finish", function () {
+            const db          = new sqlite3.Database(newDbPath);
+            const browserName = "Mozilla Firefox";
+            db.serialize(function () {
+                db.each("SELECT title, last_visit_date, url from moz_places", function (err, row) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        records.push(new Record(row.title, row.last_visit_date, row.url, browserName));
+                    }
+                });
+            });
+            db.close(function () {
+                fs.unlink(newDbPath, function (err) {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(records);
+                });
+            });
         });
-        db.close();
     });
 }
 
-function getChromeOperaHistory(path, browserName) {
+function getChromeOperaHistory(dbPath, browserName) {
     return new Promise(function (resolve, reject) {
-        var newDbPath = "";
-        if (process.env.OS === "Windows_NT") {
-            newDbPath = process.env.TMP + "\\tmp.sqlite";
-        }
-        else {
-            newDbPath = process.env.TMP + "/tmp.sqlite";
-        }
+        var newDbPath = path.join(process.env.TMP, uuidV4() + ".sqlite");
 
         //Assuming the sqlite file is locked so lets make a copy of it
-        var readStream  = fs.createReadStream(path),
+        var readStream  = fs.createReadStream(dbPath),
             writeStream = fs.createWriteStream(newDbPath),
             stream      = readStream.pipe(writeStream);
 
         stream.on("finish", function () {
             const db = new sqlite3.Database(newDbPath);
-            db.all("SELECT title, last_visit_time, url from urls", function (err, rows) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    for (var i = 0; i < rows.length; i++) {
-                        records.push(new Record(rows[i].title, rows[i].last_visit_time, rows[i].url, browserName));
+            db.serialize(function () {
+                db.each("SELECT title, last_visit_time, url from urls", function (err, row) {
+                    if (err) {
+                        reject(err);
                     }
-                    resolve(records);
-                }
+                    else {
+                        records.push(new Record(row.title, row.last_visit_time, row.url, browserName));
+                    }
+                });
             });
-            db.close();
+
+            db.close(function () {
+                fs.unlink(newDbPath, function (err) {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(records);
+                });
+            });
         });
     });
+
 }
 
 function getFirefoxPath(firefoxPath, user) {
