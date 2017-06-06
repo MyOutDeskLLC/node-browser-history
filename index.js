@@ -186,14 +186,15 @@ function getWindowsBrowserHistory(driveLetter, user) {
             opera: path.join(basePath, "Roaming", "Opera Software", "Opera Stable", "History"),
             ie: path.join(basePath, "Local", "Microsoft", "Windows", "History", "History.IE5"),
             edge: path.join(basePath, "Local", "Packages"),
-            torch: "",
-            maxthon: "",
-            seamonkey: "",
-            avant: ""
+            torch: path.join(basePath, "Local", "Torch", "User Data", "Default", "History"),
+            seamonkey: path.join(basePath, "Roaming", "Mozilla", "SeaMonkey", "Profiles"),
         };
         var getPaths = [
             getFirefoxPath(browsers.firefox, user).then(function (foundPath) {
                 browsers.firefox = foundPath;
+            }),
+            getFirefoxPath(browsers.seamonkey, user).then(function (foundPath) {
+                browsers.seamonkey = foundPath;
             }),
             getMicrosoftEdgePath(browsers.edge).then(function (foundPath) {
                 browsers.edge = foundPath;
@@ -207,9 +208,11 @@ function getWindowsBrowserHistory(driveLetter, user) {
                 }
             }
             var getRecords = [
-                getFireFoxHistory(browsers.firefox),
+                getFireFoxHistory(browsers.firefox, "Mozilla Firefox"),
+                getFireFoxHistory(browsers.seamonkey, "SeaMonkey"),
                 getStandardHistory(browsers.chrome, "Google Chrome"),
-                getStandardHistory(browsers.opera, "Opera")
+                getStandardHistory(browsers.opera, "Opera"),
+                getStandardHistory(browsers.torch, "Torch")
             ];
             Promise.all(getRecords).then(function (browserRecords) {
                 resolve(records);
