@@ -3,20 +3,21 @@
 This module will gather browser history from common internet browsers.
 > Operating Systems Supported
 
-* Windows
-* Mac (Coming Soon)
+* Windows (Partially Complete)
+* Mac
 
 > Browsers Supported
 
 * Google Chrome
 * Mozilla Firefox
 * Opera
-* Safari (Coming Soon)
+* Safari (Mac Only)
+* Seamonkey (Mac Only)
+* Vivaldi (Mac Only)
 * Internet Explorer (Coming Soon)
 * Microsoft Edge (Coming Soon)
 * Torch (Coming Soon)
 * Maxthon (Coming Soon)
-* Seamonkey (Coming Soon)
 * Avant (Coming Soon)
 
 # How to Install
