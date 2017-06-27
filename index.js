@@ -7,16 +7,17 @@ const path    = require("path"),
 var records   = [];
 
 function Record(title, dateVisited, url, browserName) {
-    this.title        = title;
-    this.dateVisisted = dateVisited;
-    this.url          = url;
-    this.browserName  = browserName;
+    this.title       = title;
+    this.dateVisited = dateVisited;
+    this.url         = url;
+    this.browserName = browserName;
 }
 
 
 function getFireFoxHistory(firefoxPath, browserName) {
     return new Promise(function (resolve, reject) {
-        if (!firefoxPath || firefoxPath === "") {
+        if (!firefoxPath || firefoxPath === "")
+        {
             return resolve(records);
         }
         var newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
@@ -27,20 +28,23 @@ function getFireFoxHistory(firefoxPath, browserName) {
             stream      = readStream.pipe(writeStream);
 
         stream.on("finish", function () {
-            const db          = new sqlite3.Database(newDbPath);
+            const db = new sqlite3.Database(newDbPath);
             db.serialize(function () {
                 db.each("SELECT title, last_visit_date, url from moz_places", function (err, row) {
-                    if (err) {
+                    if (err)
+                    {
                         reject(err);
                     }
-                    else {
+                    else
+                    {
                         records.push(new Record(row.title, row.last_visit_date, row.url, browserName));
                     }
                 });
             });
             db.close(function () {
                 fs.unlink(newDbPath, function (err) {
-                    if (err) {
+                    if (err)
+                    {
                         return reject(err);
                     }
                     return resolve(records);
@@ -52,7 +56,8 @@ function getFireFoxHistory(firefoxPath, browserName) {
 
 function getStandardHistory(dbPath, browserName) {
     return new Promise(function (resolve, reject) {
-        if (!dbPath || dbPath === "") {
+        if (!dbPath || dbPath === "")
+        {
             return resolve(records);
         }
         var newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
@@ -66,10 +71,12 @@ function getStandardHistory(dbPath, browserName) {
             const db = new sqlite3.Database(newDbPath);
             db.serialize(function () {
                 db.each("SELECT title, last_visit_time, url from urls", function (err, row) {
-                    if (err) {
+                    if (err)
+                    {
                         reject(err);
                     }
-                    else {
+                    else
+                    {
                         records.push(new Record(row.title, row.last_visit_time, row.url, browserName));
                     }
                 });
@@ -77,7 +84,8 @@ function getStandardHistory(dbPath, browserName) {
 
             db.close(function () {
                 fs.unlink(newDbPath, function (err) {
-                    if (err) {
+                    if (err)
+                    {
                         return reject(err);
                     }
                     return resolve(records);
@@ -89,7 +97,8 @@ function getStandardHistory(dbPath, browserName) {
 
 function getSafariHistory(dbPath, browserName) {
     return new Promise(function (resolve, reject) {
-        if (!dbPath || dbPath === "") {
+        if (!dbPath || dbPath === "")
+        {
             return resolve(records);
         }
         var newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
@@ -102,19 +111,24 @@ function getSafariHistory(dbPath, browserName) {
         stream.on("finish", function () {
             const db = new sqlite3.Database(newDbPath);
             db.serialize(function () {
-                db.each("SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.id", function (err, row) {
-                    if (err) {
-                        reject(err);
-                    }
-                    else {
-                        records.push(new Record(row.title, row.visit_time, row.url, browserName));
-                    }
-                });
+                db.each(
+                    "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.id",
+                    function (err, row) {
+                        if (err)
+                        {
+                            reject(err);
+                        }
+                        else
+                        {
+                            records.push(new Record(row.title, row.visit_time, row.url, browserName));
+                        }
+                    });
             });
 
             db.close(function () {
                 fs.unlink(newDbPath, function (err) {
-                    if (err) {
+                    if (err)
+                    {
                         return reject(err);
                     }
                     return resolve(records);
@@ -127,22 +141,27 @@ function getSafariHistory(dbPath, browserName) {
 function getFirefoxPath(firefoxPath, user) {
     return new Promise(function (resolve, reject) {
         fs.readdir(firefoxPath, function (err, files) {
-            if (err) {
+            if (err)
+            {
                 resolve(null);
                 return;
             }
-            for (var i = 0, j = 0; j < 2; i++) {
+            for (var i = 0, j = 0; j < 2; i++)
+            {
                 //First iteration of the loop look for something with the users username in it
-                if (j === 0 && files[i].indexOf(user) !== -1) {
+                if (j === 0 && files[i].indexOf(user) !== -1)
+                {
                     resolve(path.join(firefoxPath, files[i], "places.sqlite"));
                     break;
                 }
                 //Second iteration of the loop look for something with default in it
-                else if (j === 1 && files[i].indexOf("default") !== -1) {
+                else if (j === 1 && files[i].indexOf("default") !== -1)
+                {
                     resolve(path.join(firefoxPath, files[i], "places.sqlite"));
                     break;
                 }
-                if (i === files.length - 1) {
+                if (i === files.length - 1)
+                {
                     j++;
                     //i is negative one because the loop is post fix incremented so i will be 0 next iteration
                     i = -1;
@@ -155,18 +174,24 @@ function getFirefoxPath(firefoxPath, user) {
 function getMicrosoftEdgePath(microsoftEdgePath) {
     return new Promise(function (resolve, reject) {
         fs.readdir(microsoftEdgePath, function (err, files) {
-            if (err) {
+            if (err)
+            {
                 resolve(null);
                 return;
             }
-            for (var i = 0; i < files.length; i++) {
-                if (files[i].indexOf("Microsoft.MicrosoftEdge") !== -1) {
-                    microsoftEdgePath = path.join(microsoftEdgePath, files[i], "AC", "MicrosoftEdge", "User", "Default", "DataStore", "Data", "nouser1");
+            for (var i = 0; i < files.length; i++)
+            {
+                if (files[i].indexOf("Microsoft.MicrosoftEdge") !== -1)
+                {
+                    microsoftEdgePath = path.join(
+                        microsoftEdgePath, files[i], "AC", "MicrosoftEdge", "User", "Default", "DataStore", "Data",
+                        "nouser1");
                     break;
                 }
             }
             fs.readdir(microsoftEdgePath, function (err2, files2) {
-                if (err) {
+                if (err)
+                {
                     resolve(null);
                 }
                 //console.log(path.join(microsoftEdgePath, files2[0], "DBStore", "spartan.edb"));
@@ -187,7 +212,7 @@ function getWindowsBrowserHistory(driveLetter, user) {
             ie: path.join(basePath, "Local", "Microsoft", "Windows", "History", "History.IE5"),
             edge: path.join(basePath, "Local", "Packages"),
             torch: path.join(basePath, "Local", "Torch", "User Data", "Default", "History"),
-            seamonkey: path.join(basePath, "Roaming", "Mozilla", "SeaMonkey", "Profiles"),
+            seamonkey: path.join(basePath, "Roaming", "Mozilla", "SeaMonkey", "Profiles")
         };
         var getPaths = [
             getFirefoxPath(browsers.firefox, user).then(function (foundPath) {
@@ -202,8 +227,10 @@ function getWindowsBrowserHistory(driveLetter, user) {
         ];
 
         Promise.all(getPaths).then(function (values) {
-            for (var browser in browsers) {
-                if (!fs.existsSync(browsers[browser])) {
+            for (var browser in browsers)
+            {
+                if (!fs.existsSync(browsers[browser]))
+                {
                     browsers[browser] = null;
                 }
             }
@@ -230,7 +257,8 @@ function getMacBrowserHistory(homeDirectory, user) {
     return new Promise(function (resolve, reject) {
 
         var browsers = {
-            chrome: path.join(homeDirectory, "Library", "Application Support", "Google", "Chrome", "Default", "History"),
+            chrome: path.join(
+                homeDirectory, "Library", "Application Support", "Google", "Chrome", "Default", "History"),
             firefox: path.join(homeDirectory, "Library", "Application Support", "Firefox", "Profiles"),
             safari: path.join(homeDirectory, "Library", "Safari", "History.db"),
             opera: path.join(homeDirectory, "Library", "Application Support", "com.operasoftware.Opera", "History"),
@@ -246,8 +274,10 @@ function getMacBrowserHistory(homeDirectory, user) {
             })
         ];
         Promise.all(getPaths).then(function (values) {
-            for (var browser in browsers) {
-                if (!fs.existsSync(browsers[browser])) {
+            for (var browser in browsers)
+            {
+                if (!fs.existsSync(browsers[browser]))
+                {
                     browsers[browser] = null;
                 }
             }
@@ -275,14 +305,16 @@ function getMacBrowserHistory(homeDirectory, user) {
 function getHistory() {
     return new Promise(function (resolve, reject) {
 
-        if (process.env.OS === "Windows_NT") {
+        if (process.env.OS === "Windows_NT")
+        {
             getWindowsBrowserHistory(process.env.HOMEDRIVE, process.env.USERNAME).then(function (browserHistory) {
                 resolve(browserHistory);
             }).catch(function (err) {
                 reject(err);
             });
         }
-        else {
+        else
+        {
             getMacBrowserHistory(process.env.HOME, process.env.USER).then(function (browserHistory) {
                 resolve(browserHistory);
             }).catch(function (err) {
