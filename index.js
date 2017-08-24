@@ -29,7 +29,7 @@ function getFireFoxHistory(firefoxPath, browserName) {
         stream.on("finish", function () {
             const db = new sqlite3.Database(newDbPath);
             db.serialize(function () {
-                db.each("SELECT title, last_visit_date, url from moz_places WHERE DATETIME (last_visit_date/1000000+ (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-5 minutes')", function (err, row) {
+                db.each("SELECT title, last_visit_date, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-5 minutes')", function (err, row) {
                     if (err) {
                         reject(err);
                     }
@@ -70,7 +70,7 @@ function getStandardHistory(dbPath, browserName) {
         stream.on("finish", function () {
             const db = new sqlite3.Database(newDbPath);
             db.serialize(function () {
-                db.each("SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000+ (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-5 minutes')", function (err, row) {
+                db.each("SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-5 minutes')", function (err, row) {
                     if (err) {
                         reject(err);
                     }
@@ -113,7 +113,7 @@ function getSafariHistory(dbPath, browserName) {
             const db = new sqlite3.Database(newDbPath);
             db.serialize(function () {
                 db.each(
-                    "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.id WHERE DATETIME (v.visit_time/1000000+ (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-5 minutes')",
+                    "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.id WHERE DATETIME (v.visit_time + (strftime('%s', '2001-01-01 00:00:00')), 'unixepoch')  >= DATETIME('now', '-5 minutes')",
                     function (err, row) {
                         if (err) {
                             reject(err);
