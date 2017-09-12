@@ -70,7 +70,7 @@ function getStandardHistory(dbPath, browserName) {
         stream.on("finish", function () {
             const db = new sqlite3.Database(newDbPath);
             db.serialize(function () {
-                db.each("SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-5 minutes')", function (err, row) {
+                db.each("SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 - 11644473600, 'unixepoch')  >= DATETIME('now', '-5 minutes')", function (err, row) {
                     if (err) {
                         reject(err);
                     }
