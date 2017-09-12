@@ -79,7 +79,7 @@ function getStandardHistory (dbPath, browserName) {
             }
             else {
               let t = moment.unix(row.last_visit_time/1000000 -11644473600);
-              console.log(t);
+              //console.log(t);
               records.push({
                 title:    row.title,
                 utc_time: t.valueOf(),
