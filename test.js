@@ -11,17 +11,17 @@ function singleRun() {
     });
 }
 
-function concurrencyLockTest() {
-    var pass = true;
-    for (var x = 0; x < 100; x++) {
-        getHistory().then(function (stuff) {
-        }).catch(function (someError) {
-            pass = false;
-            console.log("Fail Concurrency Lock Test");
-            console.error(someError);
-        });
-    }
-}
+//function concurrencyLockTest() {
+//    var pass = true;
+//    for (var x = 0; x < 100; x++) {
+//        getHistory().then(function (stuff) {
+//        }).catch(function (someError) {
+//            pass = false;
+//            console.log("Fail Concurrency Lock Test");
+//            console.error(someError);
+//        });
+//    }
+//}
 
 singleRun();
 //concurrencyLockTest();
