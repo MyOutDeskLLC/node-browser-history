@@ -161,6 +161,57 @@ function getMozillaRecordsFromBrowser(paths, browserName) {
 
 }
 
+function getSafariRecordsFromBrowser(paths, browserName){
+    let browserHistory = [];
+    return new Promise((resolve, reject) => {
+        if (!paths || paths.length === 0) {
+            return resolve(browserHistory);
+        }
+        for (let i = 0; i < paths.length; i++) {
+            if (paths[i] || paths[i] !== "") {
+                let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+
+                //Assuming the sqlite file is locked so lets make a copy of it
+                let readStream  = fs.createReadStream(paths[i]),
+                    writeStream = fs.createWriteStream(newDbPath),
+                    stream      = readStream.pipe(writeStream);
+
+                stream.on("finish", function () {
+                    const db = new sqlite3.Database(newDbPath);
+                    db.serialize(function () {
+                        db.each(
+                            "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.id WHERE DATETIME (v.visit_time + (strftime('%s', '2001-01-01 00:00:00')), 'unixepoch')  >= DATETIME('now', '-5 minutes')",
+                            function (err, row) {
+                                if (err) {
+                                    reject(err);
+                                }
+                                else {
+                                    records.push({
+                                                     title:    row.title,
+                                                     utc_time: row.visit_time,
+                                                     url:      row.url,
+                                                     browser:  browserName
+                                                 });
+                                }
+                            });
+                    });
+
+                    db.close(function () {
+                        fs.unlink(newDbPath, function (err) {
+                            if (err) {
+                                return reject(err);
+                            }
+                        });
+                        if (i === paths.length - 1) {
+                            resolve(browserHistory);
+                        }
+                    });
+                });
+            }
+        }
+    });
+}
+
 function getStandardHistory(paths = [], browserName) {
     return new Promise((resolve, reject) => {
         getStandardRecordsFromBrowser(paths, browserName).then(foundRecords => {
@@ -172,46 +223,11 @@ function getStandardHistory(paths = [], browserName) {
     });
 }
 
-function getSafariHistory(dbPath, browserName) {
+function getSafariHistory(paths, browserName) {
     return new Promise(function (resolve, reject) {
-        if (!dbPath || dbPath === "") {
-            return resolve(records);
-        }
-        let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
-
-        //Assuming the sqlite file is locked so lets make a copy of it
-        let readStream  = fs.createReadStream(dbPath),
-            writeStream = fs.createWriteStream(newDbPath),
-            stream      = readStream.pipe(writeStream);
-
-        stream.on("finish", function () {
-            const db = new sqlite3.Database(newDbPath);
-            db.serialize(function () {
-                db.each(
-                    "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.id WHERE DATETIME (v.visit_time + (strftime('%s', '2001-01-01 00:00:00')), 'unixepoch')  >= DATETIME('now', '-5 minutes')",
-                    function (err, row) {
-                        if (err) {
-                            reject(err);
-                        }
-                        else {
-                            records.push({
-                                             title:    row.title,
-                                             utc_time: row.visit_time,
-                                             url:      row.url,
-                                             browser:  browserName
-                                         });
-                        }
-                    });
-            });
-
-            db.close(function () {
-                fs.unlink(newDbPath, function (err) {
-                    if (err) {
-                        return reject(err);
-                    }
-                    return resolve(records);
-                });
-            });
+        getSafariRecordsFromBrowser(paths, browserName).then(foundRecords=>{
+            records = records.concat(foundRecords);
+            resolve(records);
         });
     });
 }
@@ -360,11 +376,6 @@ function getMacBrowserHistory(homeDirectory, user) {
             })
         ];
         Promise.all(getPaths).then(function (values) {
-            for (let browser in browsers) {
-                if (!fs.existsSync(browsers[browser])) {
-                    browsers[browser] = null;
-                }
-            }
             let getRecords = [
                 getFireFoxHistory(browsers.firefox, "Mozilla Firefox"),
                 getStandardHistory(browsers.chrome, "Google Chrome"),
@@ -375,6 +386,7 @@ function getMacBrowserHistory(homeDirectory, user) {
 
             ];
             Promise.all(getRecords).then(function () {
+                console.log('here');
                 resolve(records);
             }).catch(function (dbReadError) {
                 reject(dbReadError);
