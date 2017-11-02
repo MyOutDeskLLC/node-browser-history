@@ -180,6 +180,10 @@ function getSafariRecordsFromBrowser(paths, browserName) {
                     let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
 
                     //Assuming the sqlite file is locked so lets make a copy of it
+                    const originalDB = new sqlite3.Database(paths[i]);
+                    originalDB.serialize(()=>{
+                        originalDB.run("PRAGMA wal_checkpoint");
+                    });
                     let readStream  = fs.createReadStream(paths[i]),
                         writeStream = fs.createWriteStream(newDbPath),
                         stream      = readStream.pipe(writeStream);
@@ -187,6 +191,7 @@ function getSafariRecordsFromBrowser(paths, browserName) {
                     stream.on("finish", function () {
                         const db = new sqlite3.Database(newDbPath);
                         db.serialize(function () {
+                            db.run("PRAGMA wal_checkpoint");
                             db.each(
                                 "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-5 minutes')",
                                 function (err, row) {
