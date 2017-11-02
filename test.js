@@ -3,7 +3,6 @@ let getHistory = require("./index");
 
 function singleRun() {
     return new Promise((res, rej) => {
-
         getHistory().then(function (history) {
             res(history);
         }).catch(function (error) {

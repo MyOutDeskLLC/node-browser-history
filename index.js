@@ -201,10 +201,11 @@ function getSafariRecordsFromBrowser(paths, browserName) {
                                                 reject(err);
                                             }
                                             else {
+                                                let t = moment.unix(Math.floor(row.visit_time + 978307200));
                                                 browserHistory.push(
                                                     {
                                                         title:    row.title,
-                                                        utc_time: row.visit_time,
+                                                        utc_time: t.valueOf(),
                                                         url:      row.url,
                                                         browser:  browserName
                                                     });
