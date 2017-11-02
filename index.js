@@ -181,8 +181,9 @@ function getSafariRecordsFromBrowser(paths, browserName) {
 
                     //Assuming the sqlite file is locked so lets make a copy of it
                     const originalDB = new sqlite3.Database(paths[i]);
-                    // This has to be called to merge .db-wall, the in memory db, to disk so we can access the history when safari is open
-                    originalDB.serialize(()=>{
+                    // This has to be called to merge .db-wall, the in memory db, to disk so we can access the history
+                    // when safari is open
+                    originalDB.serialize(() => {
                         originalDB.run("PRAGMA wal_checkpoint");
                     });
                     let readStream  = fs.createReadStream(paths[i]),
@@ -199,12 +200,13 @@ function getSafariRecordsFromBrowser(paths, browserName) {
                                         reject(err);
                                     }
                                     else {
-                                        browserHistory.push({
-                                                                title:    row.title,
-                                                                utc_time: row.visit_time,
-                                                                url:      row.url,
-                                                                browser:  browserName
-                                                            });
+                                        browserHistory.push(
+                                            {
+                                                title:    row.title,
+                                                utc_time: row.visit_time,
+                                                url:      row.url,
+                                                browser:  browserName
+                                            });
                                     }
                                 });
 
