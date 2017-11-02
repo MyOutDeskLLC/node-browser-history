@@ -2,26 +2,34 @@ var getHistory = require("./index");
 
 
 function singleRun() {
-    getHistory().then(function (stuff) {
-        console.log(stuff);
-        console.log("Pass Single Run Test");
+    getHistory().then(function (history) {
+        console.log(history);
+        console.log("PASS Single Run Test");
     }).catch(function (someError) {
-        console.log("Fail Single Run Test");
+        console.log("***** FAIL Single Run Test *****");
         console.error(someError);
     });
 }
 
-//function concurrencyLockTest() {
-//    var pass = true;
-//    for (var x = 0; x < 100; x++) {
-//        getHistory().then(function (stuff) {
-//        }).catch(function (someError) {
-//            pass = false;
-//            console.log("Fail Concurrency Lock Test");
-//            console.error(someError);
-//        });
-//    }
-//}
+function concurrencyLockTest() {
+    console.log("Running Concurrency Lock Test");
+    let pass = true;
+    for (let x = 0; x < 100; x++) {
+        getHistory().then(function (history) {
+            //Don't comment this in unless you want to see 100x the same history
+            //console.log(history);
+        }).catch(function (someError) {
+            pass = false;
+            console.error(someError);
+        });
+    }
+    if(!pass){
+        console.log("****** FAIL Concurrency Lock Test ******");
+        return 1;
+    }
+    console.log("PASS Concurrency Lock Test");
+    return 0;
+}
 
 singleRun();
 //concurrencyLockTest();
