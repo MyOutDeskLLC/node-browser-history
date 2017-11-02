@@ -57,158 +57,168 @@ function getFireFoxHistory(paths = [], browserName) {
 
 function getStandardRecordsFromBrowser(paths, browserName) {
     let browserHistory = [];
+    let h              = [];
     return new Promise((resolve, reject) => {
         if (!paths || paths.length === 0) {
             return resolve(browserHistory);
         }
         for (let i = 0; i < paths.length; i++) {
             if (paths[i] || paths[i] !== "") {
-                let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+                h.push(new Promise(res => {
+                    let newDbPath   = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+                    //Assuming the sqlite file is locked so lets make a copy of it
+                    let readStream  = fs.createReadStream(paths[i]),
+                        writeStream = fs.createWriteStream(newDbPath),
+                        stream      = readStream.pipe(writeStream);
 
-                //Assuming the sqlite file is locked so lets make a copy of it
-                let readStream  = fs.createReadStream(paths[i]),
-                    writeStream = fs.createWriteStream(newDbPath),
-                    stream      = readStream.pipe(writeStream);
-
-                stream.on("finish", () => {
-                    let db = new sqlite3.Database(newDbPath);
-                    db.serialize(() => {
-                        db.each(
-                            "SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-5 minutes')",
-                            function (err, row) {
-                                if (err) {
-                                    reject(err);
-                                }
-                                else {
-                                    let t = moment.unix(row.last_visit_time / 1000000 - 11644473600);
-                                    //console.log(t);
-                                    browserHistory.push(
-                                        {
-                                            title:    row.title,
-                                            utc_time: t.valueOf(),
-                                            url:      row.url,
-                                            browser:  browserName
-                                        });
-                                }
+                    stream.on("finish", () => {
+                        let db = new sqlite3.Database(newDbPath);
+                        db.serialize(() => {
+                            db.each(
+                                "SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-5 minutes')",
+                                function (err, row) {
+                                    if (err) {
+                                        reject(err);
+                                    }
+                                    else {
+                                        let t = moment.unix(row.last_visit_time / 1000000 - 11644473600);
+                                        browserHistory.push({
+                                                                title:    row.title,
+                                                                utc_time: t.valueOf(),
+                                                                url:      row.url,
+                                                                browser:  browserName
+                                                            });
+                                    }
+                                });
+                            db.close(() => {
+                                fs.unlink(newDbPath, (err) => {
+                                    if (err) {
+                                        return reject(err);
+                                    }
+                                });
+                                res();
                             });
-                    });
-
-                    db.close(() => {
-                        fs.unlink(newDbPath, (err) => {
-                            if (err) {
-                                return reject(err);
-                            }
                         });
-                        if (i === paths.length - 1) {
-                            resolve(browserHistory);
-                        }
                     });
-                });
+                }));
             }
         }
+        Promise.all(h).then(() => {
+            resolve(browserHistory);
+        });
     });
 }
 
 function getMozillaRecordsFromBrowser(paths, browserName) {
-    let browserHistory = [];
+    let browserHistory = [],
+        h              = [];
     return new Promise((resolve, reject) => {
         if (!paths || paths.length === 0) {
-            return resolve(browserHistory);
+            resolve(browserHistory);
         }
         for (let i = 0; i < paths.length; i++) {
             if (paths[i] || paths[i] !== "") {
-                let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+                h.push(new Promise(res => {
 
-                //Assuming the sqlite file is locked so lets make a copy of it
-                let readStream  = fs.createReadStream(paths[i]),
-                    writeStream = fs.createWriteStream(newDbPath),
-                    stream      = readStream.pipe(writeStream);
+                    let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
 
-                stream.on("finish", function () {
-                    const db = new sqlite3.Database(newDbPath);
-                    db.serialize(function () {
-                        db.each(
-                            "SELECT title, last_visit_date, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-5 minutes')",
-                            function (err, row) {
-                                if (err) {
-                                    reject(err);
-                                }
-                                else {
-                                    let t = moment.unix(row.last_visit_date / 1000000);
-                                    browserHistory.push({
-                                                            title:    row.title,
-                                                            utc_time: t.valueOf(),
-                                                            url:      row.url,
-                                                            browser:  browserName
-                                                        });
-                                }
+                    //Assuming the sqlite file is locked so lets make a copy of it
+                    let readStream  = fs.createReadStream(paths[i]),
+                        writeStream = fs.createWriteStream(newDbPath),
+                        stream      = readStream.pipe(writeStream);
+
+                    stream.on("finish", function () {
+                        const db = new sqlite3.Database(newDbPath);
+                        db.serialize(function () {
+                            db.each(
+                                "SELECT title, last_visit_date, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-5 minutes')",
+                                function (err, row) {
+                                    if (err) {
+                                        reject(err);
+                                    }
+                                    else {
+                                        let t = moment.unix(row.last_visit_date / 1000000);
+                                        browserHistory.push({
+                                                                title:    row.title,
+                                                                utc_time: t.valueOf(),
+                                                                url:      row.url,
+                                                                browser:  browserName
+                                                            });
+                                    }
+                                });
+                            db.close(() => {
+                                fs.unlink(newDbPath, (err) => {
+                                    if (err) {
+                                        return reject(err);
+                                    }
+                                });
+                                res();
                             });
-                    });
-                    db.close(function () {
-                        fs.unlink(newDbPath, function (err) {
-                            if (err) {
-                                return reject(err);
-                            }
                         });
-                        if (i === paths.length - 1) {
-                            resolve(browserHistory);
-                        }
                     });
-                });
+                }));
             }
         }
+        Promise.all(h).then(() => {
+            resolve(browserHistory);
+        });
     });
 
 }
 
-function getSafariRecordsFromBrowser(paths, browserName){
-    let browserHistory = [];
+function getSafariRecordsFromBrowser(paths, browserName) {
+    let browserHistory = [],
+        h              = [];
     return new Promise((resolve, reject) => {
         if (!paths || paths.length === 0) {
-            return resolve(browserHistory);
+            resolve(browserHistory);
         }
         for (let i = 0; i < paths.length; i++) {
             if (paths[i] || paths[i] !== "") {
-                let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+                h.push(new Promise(res => {
 
-                //Assuming the sqlite file is locked so lets make a copy of it
-                let readStream  = fs.createReadStream(paths[i]),
-                    writeStream = fs.createWriteStream(newDbPath),
-                    stream      = readStream.pipe(writeStream);
+                    let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
 
-                stream.on("finish", function () {
-                    const db = new sqlite3.Database(newDbPath);
-                    db.serialize(function () {
-                        db.each(
-                            "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.id WHERE DATETIME (v.visit_time + (strftime('%s', '2001-01-01 00:00:00')), 'unixepoch')  >= DATETIME('now', '-5 minutes')",
-                            function (err, row) {
-                                if (err) {
-                                    reject(err);
-                                }
-                                else {
-                                    records.push({
-                                                     title:    row.title,
-                                                     utc_time: row.visit_time,
-                                                     url:      row.url,
-                                                     browser:  browserName
-                                                 });
-                                }
+                    //Assuming the sqlite file is locked so lets make a copy of it
+                    let readStream  = fs.createReadStream(paths[i]),
+                        writeStream = fs.createWriteStream(newDbPath),
+                        stream      = readStream.pipe(writeStream);
+
+                    stream.on("finish", function () {
+                        const db = new sqlite3.Database(newDbPath);
+                        db.serialize(function () {
+                            db.each(
+                                "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-5 minutes')",
+                                function (err, row) {
+                                    if (err) {
+                                        reject(err);
+                                    }
+                                    else {
+                                        browserHistory.push({
+                                                                title:    row.title,
+                                                                utc_time: row.visit_time,
+                                                                url:      row.url,
+                                                                browser:  browserName
+                                                            });
+                                    }
+                                });
+
+                            db.close(() => {
+                                fs.unlink(newDbPath, (err) => {
+                                    if (err) {
+                                        return reject(err);
+                                    }
+                                });
+                                res();
                             });
-                    });
-
-                    db.close(function () {
-                        fs.unlink(newDbPath, function (err) {
-                            if (err) {
-                                return reject(err);
-                            }
                         });
-                        if (i === paths.length - 1) {
-                            resolve(browserHistory);
-                        }
                     });
-                });
+                }));
             }
         }
+        Promise.all(h).then(() => {
+            resolve(browserHistory);
+        });
     });
 }
 
@@ -225,9 +235,11 @@ function getStandardHistory(paths = [], browserName) {
 
 function getSafariHistory(paths, browserName) {
     return new Promise(function (resolve, reject) {
-        getSafariRecordsFromBrowser(paths, browserName).then(foundRecords=>{
+        getSafariRecordsFromBrowser(paths, browserName).then(foundRecords => {
             records = records.concat(foundRecords);
             resolve(records);
+        }, error => {
+            reject(error);
         });
     });
 }
@@ -245,7 +257,7 @@ function findPaths(path, browserName) {
                 resolve(findFilesInDir(path, "History", /History$/));
                 break;
             case "Opera":
-               resolve(findFilesInDir(path, "History", /History$/));
+                resolve(findFilesInDir(path, "History", /History$/));
                 break;
             case "Seamonkey":
                 resolve(findFilesInDir(path, "places.sqlite", /places.sqlite$/));
@@ -356,22 +368,22 @@ function getMacBrowserHistory(homeDirectory, user) {
             seamonkey: path.join(homeDirectory, "Library", "Application Support", "SeaMonkey", "Profiles")
         };
         let getPaths = [
-            findPaths(browsers.vivaldi, 'Vivaldi').then(function (foundPath) {
+            findPaths(browsers.vivaldi, "Vivaldi").then(function (foundPath) {
                 browsers.vivaldi = foundPath;
             }),
-            findPaths(browsers.firefox, 'Firefox').then(function (foundPath) {
+            findPaths(browsers.firefox, "Firefox").then(function (foundPath) {
                 browsers.firefox = foundPath;
             }),
-            findPaths(browsers.opera, 'Opera').then(function (foundPath) {
+            findPaths(browsers.opera, "Opera").then(function (foundPath) {
                 browsers.opera = foundPath;
             }),
-            findPaths(browsers.chrome, 'Chrome').then(function (foundPath) {
+            findPaths(browsers.chrome, "Chrome").then(function (foundPath) {
                 browsers.chrome = foundPath;
             }),
-            findPaths(browsers.safari, 'Safari').then(function (foundPath) {
+            findPaths(browsers.safari, "Safari").then(function (foundPath) {
                 browsers.safari = foundPath;
             }),
-            findPaths(browsers.seamonkey, 'Seamonkey').then(function (foundPath) {
+            findPaths(browsers.seamonkey, "Seamonkey").then(function (foundPath) {
                 browsers.seamonkey = foundPath;
             })
         ];
@@ -386,7 +398,6 @@ function getMacBrowserHistory(homeDirectory, user) {
 
             ];
             Promise.all(getRecords).then(function () {
-                console.log('here');
                 resolve(records);
             }).catch(function (dbReadError) {
                 reject(dbReadError);
