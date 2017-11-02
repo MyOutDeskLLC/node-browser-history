@@ -18,8 +18,8 @@ function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
     let results = [];
 
     if (!fs.existsSync(startPath)) {
-        console.log("no dir ", startPath);
-        return;
+        //console.log("no dir ", startPath);
+        return results;
     }
 
     let files = fs.readdirSync(startPath);
@@ -30,7 +30,7 @@ function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
             results = results.concat(findFilesInDir(filename, filter, regExp)); //recurse
         }
         else if (filename.indexOf(filter) >= 0 && regExp.test(filename)) {
-            console.log("-- found: ", filename);
+            //console.log("-- found: ", filename);
             results.push(filename);
         }
     }
@@ -177,49 +177,58 @@ function getSafariRecordsFromBrowser(paths, browserName) {
             if (paths[i] || paths[i] !== "") {
                 h.push(new Promise(res => {
 
-                    let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+                    let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".db");
+                    //let newLockDbPath = path.join(newDbPath + "-lock");
+                    //let newWallDbPath = path.join(newDbPath + "-wal");
+                    //let newShmDbPath = path.join(newDbPath + "-shm");
 
                     //Assuming the sqlite file is locked so lets make a copy of it
                     const originalDB = new sqlite3.Database(paths[i]);
-                    // This has to be called to merge .db-wall, the in memory db, to disk so we can access the history
-                    // when safari is open
+
                     originalDB.serialize(() => {
-                        originalDB.run("PRAGMA wal_checkpoint");
-                    });
-                    let readStream  = fs.createReadStream(paths[i]),
-                        writeStream = fs.createWriteStream(newDbPath),
-                        stream      = readStream.pipe(writeStream);
+                        // This has to be called to merge .db-wall, the in memory db, to disk so we can access the
+                        // history when safari is open
+                        originalDB.run("PRAGMA wal_checkpoint(FULL)");
+                        originalDB.close();
+                        let readStream  = fs.createReadStream(paths[i]),
+                            writeStream = fs.createWriteStream(newDbPath),
+                            stream      = readStream.pipe(writeStream);
 
-                    stream.on("finish", function () {
-                        const db = new sqlite3.Database(newDbPath);
-                        db.serialize(function () {
-                            db.each(
-                                "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-5 minutes')",
-                                function (err, row) {
-                                    if (err) {
-                                        reject(err);
-                                    }
-                                    else {
-                                        browserHistory.push(
-                                            {
-                                                title:    row.title,
-                                                utc_time: row.visit_time,
-                                                url:      row.url,
-                                                browser:  browserName
-                                            });
-                                    }
-                                });
 
-                            db.close(() => {
-                                fs.unlink(newDbPath, (err) => {
-                                    if (err) {
-                                        return reject(err);
-                                    }
+                        stream.on("finish", function () {
+                            const db = new sqlite3.Database(newDbPath);
+                            db.serialize(() => {
+                                db.run("PRAGMA wal_checkpoint(FULL)");
+                                db.each(
+                                    "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-5 minutes')",
+                                    function (err, row) {
+                                        if (err) {
+                                            reject(err);
+                                        }
+                                        else {
+                                            browserHistory.push(
+                                                {
+                                                    title:    row.title,
+                                                    utc_time: row.visit_time,
+                                                    url:      row.url,
+                                                    browser:  browserName
+                                                });
+                                        }
+                                    });
+
+                                db.close(() => {
+                                    fs.unlink(newDbPath, (err) => {
+                                        if (err) {
+                                            return reject(err);
+                                        }
+                                    });
+                                    res();
                                 });
-                                res();
                             });
                         });
                     });
+                    //fs.createWriteStream(newWallDbPath);
+
                 }));
             }
         }
