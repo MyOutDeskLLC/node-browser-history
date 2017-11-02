@@ -1,13 +1,15 @@
-var getHistory = require("./index");
+let getHistory = require("./index");
 
 
 function singleRun() {
-    getHistory().then(function (history) {
-        console.log(history);
-        console.log("PASS Single Run Test");
-    }).catch(function (someError) {
-        console.log("***** FAIL Single Run Test *****");
-        console.error(someError);
+    return new Promise((res, rej) => {
+
+        getHistory().then(function (history) {
+            res(history);
+        }).catch(function (error) {
+            console.log("***** FAIL Single Run Test *****");
+            rej(error);
+        });
     });
 }
 
@@ -23,7 +25,7 @@ function concurrencyLockTest() {
             console.error(someError);
         });
     }
-    if(!pass){
+    if (!pass) {
         console.log("****** FAIL Concurrency Lock Test ******");
         return 1;
     }
@@ -31,7 +33,14 @@ function concurrencyLockTest() {
     return 0;
 }
 
-singleRun();
+singleRun().then(history => {
+    console.log(history);
+    console.log("PASS Single Run Test");
+    process.exit(0);
+}, error => {
+    console.error(error);
+    process.exit(1);
+});
 //concurrencyLockTest();
 
 //var edge = require('edge');
