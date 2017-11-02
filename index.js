@@ -181,6 +181,7 @@ function getSafariRecordsFromBrowser(paths, browserName) {
 
                     //Assuming the sqlite file is locked so lets make a copy of it
                     const originalDB = new sqlite3.Database(paths[i]);
+                    // This has to be called to merge .db-wall, the in memory db, to disk so we can access the history when safari is open
                     originalDB.serialize(()=>{
                         originalDB.run("PRAGMA wal_checkpoint");
                     });
@@ -191,7 +192,6 @@ function getSafariRecordsFromBrowser(paths, browserName) {
                     stream.on("finish", function () {
                         const db = new sqlite3.Database(newDbPath);
                         db.serialize(function () {
-                            db.run("PRAGMA wal_checkpoint");
                             db.each(
                                 "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-5 minutes')",
                                 function (err, row) {
