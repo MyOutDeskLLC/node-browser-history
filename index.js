@@ -34,7 +34,7 @@ function findFilesInDir (startPath, filter, regExp = new RegExp('.*')) {
       results = results.concat(findFilesInDir(filename, filter, regExp)); //recurse
     }
     else if (filename.indexOf(filter) >= 0 && regExp.test(filename)) {
-      console.log('-- found: ', filename);
+      //console.log('-- found: ', filename);
       results.push(filename);
     }
   }
