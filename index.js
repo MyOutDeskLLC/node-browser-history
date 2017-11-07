@@ -34,7 +34,7 @@ function findFilesInDir (startPath, filter, regExp = new RegExp('.*')) {
       results = results.concat(findFilesInDir(filename, filter, regExp)); //recurse
     }
     else if (filename.indexOf(filter) >= 0 && regExp.test(filename)) {
-      //console.log("-- found: ", filename);
+      console.log("-- found: ", filename);
       results.push(filename);
     }
   }
@@ -379,7 +379,7 @@ function getMacBrowserHistory (homeDirectory, user) {
     let browsers = {
       chrome:    path.join(
         homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome'),
-      firefox:   path.join(homeDirectory, 'Library', 'Application Support', 'Firefox', 'Profiles'),
+      firefox:   path.join(homeDirectory, 'Library', 'Application Support', 'Firefox'),
       safari:    path.join(homeDirectory, 'Library', 'Safari'),
       opera:     path.join(homeDirectory, 'Library', 'Application Support', 'com.operasoftware.Opera'),
       vivaldi:   path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default'),
