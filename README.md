@@ -1,6 +1,6 @@
 # node-browser-history
 
-This module will gather browser history from common internet browsers.
+This module will gather browser history from common internet browsers. Only for the last 5 minutes.
 > Operating Systems Supported
 
 * Windows (Partially Complete)
