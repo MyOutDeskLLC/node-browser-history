@@ -4,6 +4,21 @@ const path    = require('path'),
       uuidV4  = require('uuid/v4'),
       moment  = require('moment');
 
+let edge                       = null,
+    browserHistoryDllPath      = '',
+    getInternetExplorerHistory = null;
+
+if (process.env.os === 'Windows_NT') {
+  edge                       = require('edge');
+  browserHistoryDllPath      = 'dlls/IEHistoryFetcher.dll';
+  getInternetExplorerHistory = edge.func(
+    {
+      assemblyFile: browserHistoryDllPath,
+      typeName:     'BrowserHistory.Fetcher',
+      methodName:   'getInternetExplorer'
+    });
+}
+
 let records = [];
 
 //Browser Names
@@ -14,7 +29,8 @@ const CHROME    = 'Google Chrome',
       SEAMONKEY = 'SeaMonkey',
       VIVALDI   = 'Vivaldi',
       SAFARI    = 'Safari',
-      MAXTHON   = 'Maxthon';
+      MAXTHON   = 'Maxthon',
+      IE        = 'Internet Explorer';
 
 /**
  * Find all files recursively in specific folder with specific extension, e.g:
@@ -134,6 +150,41 @@ function getBrowserHistory (paths = [], browserName) {
         reject(error);
       });
     }
+  });
+}
+
+function getInternetExplorerBasedBrowserRecords () {
+  let internetExplorerHistory = [];
+
+  return new Promise((resolve, reject) => {
+    getInternetExplorerHistory(null, (error, s) => {
+      if (error) {
+        throw(error);
+      }
+      else {
+        let currentTime    = moment.utc();
+        let fiveMinutesAgo = currentTime.subtract(5, 'minutes');
+        s.forEach(record => {
+          let lastVisited = moment.utc(record.LastVisited);
+          if (lastVisited > fiveMinutesAgo) {
+            internetExplorerHistory.push(new Promise(res => {
+              let newRecord   = {
+
+                title:    record.Title,
+                utc_time: lastVisited.valueOf(),
+                url:      record.URL,
+                browser:  IE
+              };
+              res(newRecord);
+            }));
+          }
+        });
+        Promise.all(internetExplorerHistory).then((foundRecords) => {
+          records = records.concat(foundRecords);
+          resolve(records);
+        });
+      }
+    });
   });
 }
 
@@ -424,8 +475,9 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
   });
 }
 
-function getWindowsBrowserHistory (driveLetter, user) {
+async function getWindowsBrowserHistory (driveLetter, user) {
   records = [];
+
   return new Promise(function (resolve, reject) {
     let basePath = path.join(driveLetter, 'Users', user, 'AppData');
     let paths    = {
@@ -437,6 +489,7 @@ function getWindowsBrowserHistory (driveLetter, user) {
       torch:     path.join(basePath, 'Local', 'Torch', 'User Data'),
       seamonkey: path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey')
     };
+
     let getPaths = [
       findPaths(paths.firefox, FIREFOX).then(function (foundPaths) {
         paths.firefox = foundPaths;
@@ -453,6 +506,7 @@ function getWindowsBrowserHistory (driveLetter, user) {
       findPaths(paths.torch, TORCH).then(function (foundPaths) {
         paths.torch = foundPaths;
       }),
+
       getMicrosoftEdgePath(paths.edge).then(function (foundPaths) {
         paths.edge = foundPaths;
       })
@@ -465,6 +519,7 @@ function getWindowsBrowserHistory (driveLetter, user) {
         getBrowserHistory(paths.chrome, CHROME),
         getBrowserHistory(paths.opera, OPERA),
         getBrowserHistory(paths.torch, TORCH),
+        getInternetExplorerBasedBrowserRecords()
 
       ];
       Promise.all(getRecords).then(function (browserRecords) {

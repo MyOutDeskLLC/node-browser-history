@@ -21,8 +21,12 @@
   },
   "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
   "dependencies": {
+    "edge": "^7.10.1",
     "moment": "^2.19.4",
     "sqlite3": "^3.1.13",
     "uuid": "^3.1.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^3.6.2"
   }
 }
