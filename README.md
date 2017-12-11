@@ -18,7 +18,7 @@ This module will gather browser history from common internet browsers. Only for 
 ![Vivaldi](https://i.imgur.com/GTy9hXK.png)
 
 * Google Chrome
-* Internet Explorer
+* Internet Explorer (Windows Only)
 * Maxthon (Mac Only)
 * Microsoft Edge (Coming Soon)
 * Mozilla Firefox
