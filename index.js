@@ -428,7 +428,7 @@ function getWindowsBrowserHistory (driveLetter, user) {
   records = [];
   return new Promise(function (resolve, reject) {
     let basePath = path.join(driveLetter, 'Users', user, 'AppData');
-    let browsers = {
+    let paths    = {
       chrome:    path.join(basePath, 'Local', 'Google', 'Chrome'),
       firefox:   path.join(basePath, 'Roaming', 'Mozilla', 'Firefox'),
       opera:     path.join(basePath, 'Roaming', 'Opera Software'),
@@ -438,33 +438,34 @@ function getWindowsBrowserHistory (driveLetter, user) {
       seamonkey: path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey')
     };
     let getPaths = [
-      findPaths(browsers.firefox, FIREFOX).then(function (foundPaths) {
-        browsers.firefox = foundPaths;
+      findPaths(paths.firefox, FIREFOX).then(function (foundPaths) {
+        paths.firefox = foundPaths;
       }),
-      findPaths(browsers.chrome, CHROME).then(function (foundPaths) {
-        browsers.chrome = foundPaths;
+      findPaths(paths.chrome, CHROME).then(function (foundPaths) {
+        paths.chrome = foundPaths;
       }),
-      findPaths(browsers.seamonkey, SEAMONKEY).then(function (foundPaths) {
-        browsers.seamonkey = foundPaths;
+      findPaths(paths.seamonkey, SEAMONKEY).then(function (foundPaths) {
+        paths.seamonkey = foundPaths;
       }),
-      findPaths(browsers.opera, OPERA).then(function (foundPaths) {
-        browsers.opera = foundPaths;
+      findPaths(paths.opera, OPERA).then(function (foundPaths) {
+        paths.opera = foundPaths;
       }),
-      findPaths(browsers.torch, TORCH).then(function (foundPaths) {
-        browsers.torch = foundPaths;
+      findPaths(paths.torch, TORCH).then(function (foundPaths) {
+        paths.torch = foundPaths;
       }),
-      getMicrosoftEdgePath(browsers.edge).then(function (foundPaths) {
-        browsers.edge = foundPaths;
+      getMicrosoftEdgePath(paths.edge).then(function (foundPaths) {
+        paths.edge = foundPaths;
       })
     ];
 
     Promise.all(getPaths).then(function (values) {
       let getRecords = [
-        getBrowserHistory(browsers.firefox, FIREFOX),
-        getBrowserHistory(browsers.seamonkey, SEAMONKEY),
-        getBrowserHistory(browsers.chrome, CHROME),
-        getBrowserHistory(browsers.opera, OPERA),
-        getBrowserHistory(browsers.torch, TORCH)
+        getBrowserHistory(paths.firefox, FIREFOX),
+        getBrowserHistory(paths.seamonkey, SEAMONKEY),
+        getBrowserHistory(paths.chrome, CHROME),
+        getBrowserHistory(paths.opera, OPERA),
+        getBrowserHistory(paths.torch, TORCH),
+
       ];
       Promise.all(getRecords).then(function (browserRecords) {
         resolve(records);
@@ -481,47 +482,48 @@ function getMacBrowserHistory (homeDirectory, user) {
   records = [];
   return new Promise(function (resolve, reject) {
 
-    let browsers = {
+    let paths    = {
       chrome:    path.join(homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome'),
       firefox:   path.join(homeDirectory, 'Library', 'Application Support', 'Firefox'),
       safari:    path.join(homeDirectory, 'Library', 'Safari'),
       opera:     path.join(homeDirectory, 'Library', 'Application Support', 'com.operasoftware.Opera'),
-      maxthon:   path.join(homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon'),
+      maxthon:   path.join(
+        homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon'),
       vivaldi:   path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default'),
       seamonkey: path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles')
     };
     let getPaths = [
-      findPaths(browsers.vivaldi, VIVALDI).then(function (foundPath) {
-        browsers.vivaldi = foundPath;
+      findPaths(paths.vivaldi, VIVALDI).then(function (foundPath) {
+        paths.vivaldi = foundPath;
       }),
-      findPaths(browsers.firefox, FIREFOX).then(function (foundPath) {
-        browsers.firefox = foundPath;
+      findPaths(paths.firefox, FIREFOX).then(function (foundPath) {
+        paths.firefox = foundPath;
       }),
-      findPaths(browsers.opera, OPERA).then(function (foundPath) {
-        browsers.opera = foundPath;
+      findPaths(paths.opera, OPERA).then(function (foundPath) {
+        paths.opera = foundPath;
       }),
-      findPaths(browsers.chrome, CHROME).then(function (foundPath) {
-        browsers.chrome = foundPath;
+      findPaths(paths.chrome, CHROME).then(function (foundPath) {
+        paths.chrome = foundPath;
       }),
-      findPaths(browsers.safari, SAFARI).then(function (foundPath) {
-        browsers.safari = foundPath;
+      findPaths(paths.safari, SAFARI).then(function (foundPath) {
+        paths.safari = foundPath;
       }),
-      findPaths(browsers.seamonkey, SEAMONKEY).then(function (foundPath) {
-        browsers.seamonkey = foundPath;
+      findPaths(paths.seamonkey, SEAMONKEY).then(function (foundPath) {
+        paths.seamonkey = foundPath;
       }),
-      findPaths(browsers.maxthon, MAXTHON).then(function (foundPath) {
-        browsers.maxthon = foundPath;
+      findPaths(paths.maxthon, MAXTHON).then(function (foundPath) {
+        paths.maxthon = foundPath;
       })
     ];
     Promise.all(getPaths).then(function (values) {
       let getRecords = [
-        getBrowserHistory(browsers.firefox, FIREFOX),
-        getBrowserHistory(browsers.chrome, CHROME),
-        getBrowserHistory(browsers.opera, OPERA),
-        getBrowserHistory(browsers.safari, SAFARI),
-        getBrowserHistory(browsers.vivaldi, VIVALDI),
-        getBrowserHistory(browsers.seamonkey, SEAMONKEY),
-        getBrowserHistory(browsers.maxthon, MAXTHON)
+        getBrowserHistory(paths.firefox, FIREFOX),
+        getBrowserHistory(paths.chrome, CHROME),
+        getBrowserHistory(paths.opera, OPERA),
+        getBrowserHistory(paths.safari, SAFARI),
+        getBrowserHistory(paths.vivaldi, VIVALDI),
+        getBrowserHistory(paths.seamonkey, SEAMONKEY),
+        getBrowserHistory(paths.maxthon, MAXTHON)
 
       ];
       Promise.all(getRecords).then(function () {
