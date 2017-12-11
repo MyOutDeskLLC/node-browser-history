@@ -168,7 +168,7 @@ function getInternetExplorerBasedBrowserRecords () {
           let lastVisited = moment.utc(record.LastVisited);
           if (lastVisited > fiveMinutesAgo) {
             internetExplorerHistory.push(new Promise(res => {
-              let newRecord   = {
+              let newRecord = {
 
                 title:    record.Title,
                 utc_time: lastVisited.valueOf(),
