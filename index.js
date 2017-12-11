@@ -475,7 +475,7 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
   });
 }
 
-async function getWindowsBrowserHistory (driveLetter, user) {
+function getWindowsBrowserHistory (driveLetter, user) {
   records = [];
 
   return new Promise(function (resolve, reject) {
