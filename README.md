@@ -8,8 +8,18 @@ This module will gather browser history from common internet browsers. Only for 
 
 > Browsers Supported
 
+![Chrome](https://i.imgur.com/SgiX8bb.png)
+![Maxthon](https://i.imgur.com/D2rD9CV.png)
+![FireFox](https://i.imgur.com/Xy4ZZTT.png)
+![Opera](https://i.imgur.com/VVYCBQW.png)
+![Safari](https://i.imgur.com/AZYxynY.png)
+![SeaMonkey](https://i.imgur.com/OgTBYE8.png)
+![Torch](https://i.imgur.com/9xB5ReO.png)
+![Vivaldi](https://i.imgur.com/GTy9hXK.png)
+
 * Google Chrome
 * Internet Explorer (Coming Soon)
+* Maxthon (Mac Only)
 * Microsoft Edge (Coming Soon)
 * Mozilla Firefox
 * Opera
