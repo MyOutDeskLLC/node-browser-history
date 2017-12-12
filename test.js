@@ -105,6 +105,7 @@ function testMaxthonOnly () {
 }
 
 function testInternetExplorerOnly () {
+  console.log(process.env.os);
   if (process.env.os === 'darwin') {
     console.log('Internet explorer not supported on Mac');
     return;
