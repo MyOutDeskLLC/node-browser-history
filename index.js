@@ -414,6 +414,7 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
   });
 }
 
+
 function getFirefoxHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
@@ -433,7 +434,7 @@ function getFirefoxHistory (historyTimeLength = 5) {
   });
 }
 
-function getSeaMonkey (historyTimeLength = 5) {
+function getSeaMonkeyHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -452,7 +453,7 @@ function getSeaMonkey (historyTimeLength = 5) {
   });
 }
 
-function getChrome (historyTimeLength = 5) {
+function getChromeHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -471,7 +472,7 @@ function getChrome (historyTimeLength = 5) {
   });
 }
 
-function getOpera (historyTimeLength = 5) {
+function getOperaHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -490,7 +491,7 @@ function getOpera (historyTimeLength = 5) {
   });
 }
 
-function getTorch (historyTimeLength = 5) {
+function getTorchHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -509,7 +510,7 @@ function getTorch (historyTimeLength = 5) {
   });
 }
 
-function getSafari (historyTimeLength = 5) {
+function getSafariHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -528,7 +529,7 @@ function getSafari (historyTimeLength = 5) {
   });
 }
 
-function getMaxthon (historyTimeLength = 5) {
+function getMaxthonHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -547,7 +548,7 @@ function getMaxthon (historyTimeLength = 5) {
   });
 }
 
-function getInternetExplorer (historyTimeLength = 5) {
+function getInternetExplorerHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
     let getRecords = [
@@ -619,5 +620,13 @@ function getAllHistory (historyTimeLength = 5) {
 }
 
 module.exports = {
-  getAllHistory
+  getAllHistory,
+  getFirefoxHistory,
+  getSeaMonkeyHistory,
+  getChromeHistory,
+  getOperaHistory,
+  getTorchHistory,
+  getSafariHistory,
+  getMaxthonHistory,
+  getInternetExplorerHistory
 };
