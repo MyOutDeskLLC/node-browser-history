@@ -105,6 +105,10 @@ function testMaxthonOnly () {
 }
 
 function testInternetExplorerOnly () {
+  if (process.env.os === 'Darwin') {
+    console.log('Internet explorer not supported on Mac');
+    return;
+  }
   console.log('***** RUNNING GET INTERNET EXPLORER ONLY *****');
   return new Promise(res => {
     history.getIEHistory(60).then(history => {
