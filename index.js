@@ -20,11 +20,11 @@ if (process.env.os === 'Windows_NT') {
 
   browserHistoryDllPath      = path.join(__dirname, 'dlls', 'IEHistoryFetcher.dll');
   getInternetExplorerHistory = edge.func(
-    {
-      assemblyFile: browserHistoryDllPath,
-      typeName:     'BrowserHistory.Fetcher',
-      methodName:   'getInternetExplorer'
-    });
+      {
+        assemblyFile: browserHistoryDllPath,
+        typeName:     'BrowserHistory.Fetcher',
+        methodName:   'getInternetExplorer',
+      });
 }
 
 let allBrowserRecords = [];
@@ -38,7 +38,7 @@ let allBrowserRecords = [];
  * @param historyTimeLength
  * @returns {Promise<array>}
  */
-function getBrowserHistory (paths = [], browserName, historyTimeLength) {
+function getBrowserHistory(paths = [], browserName, historyTimeLength) {
   return new Promise((resolve, reject) => {
     if (browserName === browsers.FIREFOX || browserName === browsers.SEAMONKEY) {
       getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
@@ -49,7 +49,7 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
       });
     }
     else if (browserName === browsers.CHROME || browserName === browsers.OPERA || browserName === browsers.TORCH ||
-      browserName === browsers.VIVALDI) {
+        browserName === browsers.VIVALDI) {
       getChromeBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
         allBrowserRecords = allBrowserRecords.concat(foundRecords);
         resolve(foundRecords);
@@ -77,7 +77,7 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
     else if (browserName === browsers.INTERNETEXPLORER) {
       //Only do this on Windows we have to do t his here because the DLL manages this
       if (process.env.os !== 'Windows_NT') {
-        return;
+        resolve();
       }
       getInternetExplorerBasedBrowserRecords(historyTimeLength).then(foundRecords => {
         allBrowserRecords = allBrowserRecords.concat(foundRecords);
@@ -90,7 +90,7 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
   });
 }
 
-function getInternetExplorerBasedBrowserRecords (historyTimeLength) {
+function getInternetExplorerBasedBrowserRecords(historyTimeLength) {
   let internetExplorerHistory = [];
   return new Promise((resolve, reject) => {
     getInternetExplorerHistory(null, (error, s) => {
@@ -109,7 +109,7 @@ function getInternetExplorerBasedBrowserRecords (historyTimeLength) {
                 title:    record.Title,
                 utc_time: lastVisited.valueOf(),
                 url:      record.URL,
-                browser:  browsers.INTERNETEXPLORER
+                browser:  browsers.INTERNETEXPLORER,
               };
               res(newRecord);
             }));
@@ -123,7 +123,7 @@ function getInternetExplorerBasedBrowserRecords (historyTimeLength) {
   });
 }
 
-function getChromeBasedBrowserRecords (paths, browserName, historyTimeLength) {
+function getChromeBasedBrowserRecords(paths, browserName, historyTimeLength) {
   let browserHistory = [];
   let h              = [];
   return new Promise((resolve, reject) => {
@@ -143,22 +143,22 @@ function getChromeBasedBrowserRecords (paths, browserName, historyTimeLength) {
             let db = new sqlite3.Database(newDbPath);
             db.serialize(() => {
               db.each(
-                'SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime(\'%s\', \'1601-01-01\')), \'unixepoch\')  >= DATETIME(\'now\', \'-' +
-                historyTimeLength + ' minutes\')',
-                function (err, row) {
-                  if (err) {
-                    reject(err);
-                  }
-                  else {
-                    let t = moment.unix(row.last_visit_time / 1000000 - 11644473600);
-                    browserHistory.push({
-                      title:    row.title,
-                      utc_time: t.valueOf(),
-                      url:      row.url,
-                      browser:  browserName
-                    });
-                  }
-                });
+                  'SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime(\'%s\', \'1601-01-01\')), \'unixepoch\')  >= DATETIME(\'now\', \'-' +
+                  historyTimeLength + ' minutes\')',
+                  function(err, row) {
+                    if (err) {
+                      reject(err);
+                    }
+                    else {
+                      let t = moment.unix(row.last_visit_time / 1000000 - 11644473600);
+                      browserHistory.push({
+                                            title:    row.title,
+                                            utc_time: t.valueOf(),
+                                            url:      row.url,
+                                            browser:  browserName,
+                                          });
+                    }
+                  });
               db.close(() => {
                 fs.unlink(newDbPath, (err) => {
                   if (err) {
@@ -178,7 +178,7 @@ function getChromeBasedBrowserRecords (paths, browserName, historyTimeLength) {
   });
 }
 
-function getMozillaBasedBrowserRecords (paths, browserName, historyTimeLength) {
+function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength) {
   let browserHistory = [],
       h              = [];
   return new Promise((resolve, reject) => {
@@ -204,26 +204,26 @@ function getMozillaBasedBrowserRecords (paths, browserName, historyTimeLength) {
                   writeStream = fs.createWriteStream(newDbPath),
                   stream      = readStream.pipe(writeStream);
 
-              stream.on('finish', function () {
+              stream.on('finish', function() {
                 const db = new sqlite3.Database(newDbPath);
-                db.serialize(function () {
+                db.serialize(function() {
                   db.each(
-                    'SELECT title, last_visit_date, url from moz_places WHERE DATETIME (last_visit_date/1000000, \'unixepoch\')  >= DATETIME(\'now\', \'-' +
-                    historyTimeLength + ' minutes\')',
-                    function (err, row) {
-                      if (err) {
-                        reject(err);
-                      }
-                      else {
-                        let t = moment.unix(row.last_visit_date / 1000000);
-                        browserHistory.push({
-                          title:    row.title,
-                          utc_time: t.valueOf(),
-                          url:      row.url,
-                          browser:  browserName
-                        });
-                      }
-                    });
+                      'SELECT title, last_visit_date, url from moz_places WHERE DATETIME (last_visit_date/1000000, \'unixepoch\')  >= DATETIME(\'now\', \'-' +
+                      historyTimeLength + ' minutes\')',
+                      function(err, row) {
+                        if (err) {
+                          reject(err);
+                        }
+                        else {
+                          let t = moment.unix(row.last_visit_date / 1000000);
+                          browserHistory.push({
+                                                title:    row.title,
+                                                utc_time: t.valueOf(),
+                                                url:      row.url,
+                                                browser:  browserName,
+                                              });
+                        }
+                      });
                   db.close(() => {
                     fs.unlink(newDbPath, (err) => {
                       if (err) {
@@ -246,7 +246,7 @@ function getMozillaBasedBrowserRecords (paths, browserName, historyTimeLength) {
 
 }
 
-function getMaxthonBasedBrowserRecords (paths, browserName, historyTimeLength) {
+function getMaxthonBasedBrowserRecords(paths, browserName, historyTimeLength) {
   let browserHistory = [],
       h              = [];
   return new Promise((resolve, reject) => {
@@ -270,28 +270,28 @@ function getMaxthonBasedBrowserRecords (paths, browserName, historyTimeLength) {
                   writeStream = fs.createWriteStream(newDbPath),
                   stream      = readStream.pipe(writeStream);
 
-              stream.on('finish', function () {
+              stream.on('finish', function() {
                 const db = new sqlite3.Database(newDbPath);
                 db.serialize(() => {
                   db.run('PRAGMA wal_checkpoint(FULL)');
                   db.each(
-                    'SELECT `zlastvisittime`, `zhost`, `ztitle`, `zurl` FROM   zmxhistoryentry WHERE  Datetime (`zlastvisittime` + 978307200, \'unixepoch\') >= Datetime(\'now\', \'-' +
-                    historyTimeLength + ' minutes\')',
-                    function (err, row) {
-                      if (err) {
-                        reject(err);
-                      }
-                      else {
-                        let t = moment.unix(Math.floor(row.ZLASTVISITTIME + 978307200));
-                        browserHistory.push(
-                          {
-                            title:    row.ZTITLE,
-                            utc_time: t.valueOf(),
-                            url:      row.ZURL,
-                            browser:  browserName
-                          });
-                      }
-                    });
+                      'SELECT `zlastvisittime`, `zhost`, `ztitle`, `zurl` FROM   zmxhistoryentry WHERE  Datetime (`zlastvisittime` + 978307200, \'unixepoch\') >= Datetime(\'now\', \'-' +
+                      historyTimeLength + ' minutes\')',
+                      function(err, row) {
+                        if (err) {
+                          reject(err);
+                        }
+                        else {
+                          let t = moment.unix(Math.floor(row.ZLASTVISITTIME + 978307200));
+                          browserHistory.push(
+                              {
+                                title:    row.ZTITLE,
+                                utc_time: t.valueOf(),
+                                url:      row.ZURL,
+                                browser:  browserName,
+                              });
+                        }
+                      });
 
                   db.close(() => {
                     fs.unlink(newDbPath, (err) => {
@@ -317,7 +317,7 @@ function getMaxthonBasedBrowserRecords (paths, browserName, historyTimeLength) {
   });
 }
 
-function getSafariBasedBrowserRecords (paths, browserName, historyTimeLength) {
+function getSafariBasedBrowserRecords(paths, browserName, historyTimeLength) {
   let browserHistory = [],
       h              = [];
   return new Promise((resolve, reject) => {
@@ -341,28 +341,28 @@ function getSafariBasedBrowserRecords (paths, browserName, historyTimeLength) {
                   writeStream = fs.createWriteStream(newDbPath),
                   stream      = readStream.pipe(writeStream);
 
-              stream.on('finish', function () {
+              stream.on('finish', function() {
                 const db = new sqlite3.Database(newDbPath);
                 db.serialize(() => {
                   db.run('PRAGMA wal_checkpoint(FULL)');
                   db.each(
-                    'SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, \'unixepoch\')  >= DATETIME(\'now\', \'-' +
-                    historyTimeLength + ' minutes\')',
-                    function (err, row) {
-                      if (err) {
-                        reject(err);
-                      }
-                      else {
-                        let t = moment.unix(Math.floor(row.visit_time + 978307200));
-                        browserHistory.push(
-                          {
-                            title:    row.title,
-                            utc_time: t.valueOf(),
-                            url:      row.url,
-                            browser:  browserName
-                          });
-                      }
-                    });
+                      'SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, \'unixepoch\')  >= DATETIME(\'now\', \'-' +
+                      historyTimeLength + ' minutes\')',
+                      function(err, row) {
+                        if (err) {
+                          reject(err);
+                        }
+                        else {
+                          let t = moment.unix(Math.floor(row.visit_time + 978307200));
+                          browserHistory.push(
+                              {
+                                title:    row.title,
+                                utc_time: t.valueOf(),
+                                url:      row.url,
+                                browser:  browserName,
+                              });
+                        }
+                      });
 
                   db.close(() => {
                     fs.unlink(newDbPath, (err) => {
@@ -388,9 +388,9 @@ function getSafariBasedBrowserRecords (paths, browserName, historyTimeLength) {
   });
 }
 
-function getMicrosoftEdgePath (microsoftEdgePath) {
-  return new Promise(function (resolve, reject) {
-    fs.readdir(microsoftEdgePath, function (err, files) {
+function getMicrosoftEdgePath(microsoftEdgePath) {
+  return new Promise(function(resolve, reject) {
+    fs.readdir(microsoftEdgePath, function(err, files) {
       if (err) {
         resolve(null);
         return;
@@ -398,12 +398,12 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
       for (let i = 0; i < files.length; i++) {
         if (files[i].indexOf('Microsoft.MicrosoftEdge') !== -1) {
           microsoftEdgePath = path.join(
-            microsoftEdgePath, files[i], 'AC', 'MicrosoftEdge', 'User', 'Default', 'DataStore', 'Data',
-            'nouser1');
+              microsoftEdgePath, files[i], 'AC', 'MicrosoftEdge', 'User', 'Default', 'DataStore', 'Data',
+              'nouser1');
           break;
         }
       }
-      fs.readdir(microsoftEdgePath, function (err2, files2) {
+      fs.readdir(microsoftEdgePath, function(err2, files2) {
         if (err) {
           resolve(null);
         }
@@ -414,34 +414,38 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
   });
 }
 
-function getFirefoxHistory (historyTimeLength = 5) {
+function getFirefoxHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.firefox, browsers.FIREFOX).then(foundPaths => {
         browsers.paths.firefox = foundPaths;
-      })
+      }),
     ];
     Promise.all(getPaths).then(() => {
       let getRecords = [
-        getBrowserHistory(browsers.paths.firefox, browsers.FIREFOX, historyTimeLength)
+        getBrowserHistory(browsers.paths.firefox, browsers.FIREFOX, historyTimeLength),
       ];
       Promise.all(getRecords).then((records) => {
         resolve(records);
-      }, error => { reject(error); });
-    }, error => { reject(error); });
+      }, error => {
+        reject(error);
+      });
+    }, error => {
+      reject(error);
+    });
   });
 }
 
-function getSeaMonkeyHistory (historyTimeLength = 5) {
+function getSeaMonkeyHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.seamonkey, browsers.SEAMONKEY).then(foundPaths => {
         browsers.paths.seamonkey = foundPaths;
-      })
+      }),
     ];
     Promise.all(getPaths).then(() => {
       let getRecords = [
-        getBrowserHistory(browsers.paths.seamonkey, browsers.SEAMONKEY, historyTimeLength)
+        getBrowserHistory(browsers.paths.seamonkey, browsers.SEAMONKEY, historyTimeLength),
       ];
       Promise.all(getRecords).then((records) => {
         resolve(records);
@@ -450,16 +454,16 @@ function getSeaMonkeyHistory (historyTimeLength = 5) {
   });
 }
 
-function getChromeHistory (historyTimeLength = 5) {
+function getChromeHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.chrome, browsers.CHROME).then(foundPaths => {
         browsers.paths.chrome = foundPaths;
-      })
+      }),
     ];
     Promise.all(getPaths).then(() => {
       let getRecords = [
-        getBrowserHistory(browsers.paths.chrome, browsers.CHROME, historyTimeLength)
+        getBrowserHistory(browsers.paths.chrome, browsers.CHROME, historyTimeLength),
       ];
       Promise.all(getRecords).then((records) => {
         resolve(records);
@@ -468,16 +472,16 @@ function getChromeHistory (historyTimeLength = 5) {
   });
 }
 
-function getOperaHistory (historyTimeLength = 5) {
+function getOperaHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.opera, browsers.OPERA).then(foundPaths => {
         browsers.paths.opera = foundPaths;
-      })
+      }),
     ];
     Promise.all(getPaths).then(() => {
       let getRecords = [
-        getBrowserHistory(browsers.paths.opera, browsers.OPERA, historyTimeLength)
+        getBrowserHistory(browsers.paths.opera, browsers.OPERA, historyTimeLength),
       ];
       Promise.all(getRecords).then((records) => {
         resolve(records);
@@ -486,16 +490,16 @@ function getOperaHistory (historyTimeLength = 5) {
   });
 }
 
-function getTorchHistory (historyTimeLength = 5) {
+function getTorchHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.torch, browsers.TORCH).then(foundPaths => {
         browsers.paths.torch = foundPaths;
-      })
+      }),
     ];
     Promise.all(getPaths).then(() => {
       let getRecords = [
-        getBrowserHistory(browsers.paths.torch, browsers.TORCH, historyTimeLength)
+        getBrowserHistory(browsers.paths.torch, browsers.TORCH, historyTimeLength),
       ];
       Promise.all(getRecords).then((records) => {
         resolve(records);
@@ -504,16 +508,16 @@ function getTorchHistory (historyTimeLength = 5) {
   });
 }
 
-function getSafariHistory (historyTimeLength = 5) {
+function getSafariHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.safari, browsers.SAFARI).then(foundPaths => {
         browsers.paths.safari = foundPaths;
-      })
+      }),
     ];
     Promise.all(getPaths).then(() => {
       let getRecords = [
-        getBrowserHistory(browsers.paths.safari, browsers.SAFARI, historyTimeLength)
+        getBrowserHistory(browsers.paths.safari, browsers.SAFARI, historyTimeLength),
       ];
       Promise.all(getRecords).then((records) => {
         resolve(records);
@@ -522,16 +526,16 @@ function getSafariHistory (historyTimeLength = 5) {
   });
 }
 
-function getMaxthonHistory (historyTimeLength = 5) {
+function getMaxthonHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.maxthon, browsers.MAXTHON).then(foundPaths => {
         browsers.paths.maxthon = foundPaths;
-      })
+      }),
     ];
     Promise.all(getPaths).then(() => {
       let getRecords = [
-        getBrowserHistory(browsers.paths.maxthon, browsers.MAXTHON, historyTimeLength)
+        getBrowserHistory(browsers.paths.maxthon, browsers.MAXTHON, historyTimeLength),
       ];
       Promise.all(getRecords).then((records) => {
         resolve(records);
@@ -540,16 +544,16 @@ function getMaxthonHistory (historyTimeLength = 5) {
   });
 }
 
-function getVivaldiHistory (historyTimeLength = 5) {
+function getVivaldiHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.vivaldi, browsers.VIVALDI).then(foundPaths => {
         browsers.paths.vivaldi = foundPaths;
-      })
+      }),
     ];
     Promise.all(getPaths).then(() => {
       let getRecords = [
-        getBrowserHistory(browsers.paths.vivaldi, browsers.VIVALDI, historyTimeLength)
+        getBrowserHistory(browsers.paths.vivaldi, browsers.VIVALDI, historyTimeLength),
       ];
       Promise.all(getRecords).then((records) => {
         resolve(records);
@@ -558,10 +562,10 @@ function getVivaldiHistory (historyTimeLength = 5) {
   });
 }
 
-function getIEHistory (historyTimeLength = 5) {
+function getIEHistory(historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getRecords = [
-      getBrowserHistory([], browsers.INTERNETEXPLORER, historyTimeLength)
+      getBrowserHistory([], browsers.INTERNETEXPLORER, historyTimeLength),
     ];
     Promise.all(getRecords).then((records) => {
       resolve(records);
@@ -575,7 +579,7 @@ function getIEHistory (historyTimeLength = 5) {
  * @param historyTimeLength | Integer
  * @returns {Promise<array>}
  */
-function getAllHistory (historyTimeLength = 5) {
+function getAllHistory(historyTimeLength = 5) {
   allBrowserRecords = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -602,6 +606,9 @@ function getAllHistory (historyTimeLength = 5) {
       }),
       browsers.findPaths(browsers.paths.maxthon, browsers.MAXTHON).then(foundPath => {
         browsers.paths.maxthon = foundPath;
+      }),
+      browsers.findPaths(browsers.paths.vivaldi, browsers.VIVALDI).then(foundPath => {
+        browsers.paths.vivaldi = foundPath;
       })
     ];
 
@@ -612,18 +619,21 @@ function getAllHistory (historyTimeLength = 5) {
         getBrowserHistory(browsers.paths.chrome, browsers.CHROME, historyTimeLength),
         getBrowserHistory(browsers.paths.opera, browsers.OPERA, historyTimeLength),
         getBrowserHistory(browsers.paths.torch, browsers.TORCH, historyTimeLength),
+        getBrowserHistory(browsers.paths.safari, browsers.SAFARI, historyTimeLength),
         getBrowserHistory(browsers.paths.vivaldi, browsers.VIVALDI, historyTimeLength),
         getBrowserHistory(browsers.paths.seamonkey, browsers.SEAMONKEY, historyTimeLength),
         getBrowserHistory(browsers.paths.maxthon, browsers.MAXTHON, historyTimeLength),
 
         //No Path because this is handled by the dll
-        getBrowserHistory([], browsers.INTERNETEXPLORER, historyTimeLength)
+        getBrowserHistory([], browsers.INTERNETEXPLORER, historyTimeLength),
 
       ];
       Promise.all(getRecords).then(() => {
         resolve(allBrowserRecords);
-      }, error => { reject(error); });
-    }, error => { reject(error); });
+      }, error => {
+        reject(error); });
+    }, error => {
+      reject(error); });
 
   });
 }
@@ -638,6 +648,6 @@ module.exports = {
   getSafariHistory,
   getMaxthonHistory,
   getVivaldiHistory,
-  getIEHistory
+  getIEHistory,
 };
 
