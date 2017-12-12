@@ -414,7 +414,6 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
   });
 }
 
-
 function getFirefoxHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
@@ -650,3 +649,4 @@ module.exports = {
   getVivaldiHistory,
   getIEHistory
 };
+

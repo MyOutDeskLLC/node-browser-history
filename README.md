@@ -38,10 +38,76 @@ This module will gather browser history from common internet browsers. Only for 
 
 # How to Use
 
-```
-const BrowserHistory = require("node-browser-history");
+``` 
+const BrowserHistory = require('node-browser-history');
 
-getHistory().then(function (history) {
-    console.log(history);
-   });
+
+//Only All Support Browser History
+
+getAllHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Firefox History
+
+getFirefoxHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Firefox History
+
+getSeaMonkeyHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Chrome History
+
+getChromeHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Opera History
+
+getOperaHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Torch History
+
+getTorchHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Safari History (Mac Only)
+
+getSafariHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Maxthon History
+
+getMaxthonHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Vivaldi History
+
+getVivaldiHistory().then(function (history) {
+  console.log(history);
+});
+
+
+//Only Retrieve Internet Explorer History
+
+getIEHistory().then(function (history) {
+  console.log(history);
+});
 ```
