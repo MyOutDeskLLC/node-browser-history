@@ -620,8 +620,8 @@ function getAllHistory (historyTimeLength = 5) {
         getBrowserHistory([], browsers.INTERNETEXPLORER, historyTimeLength)
 
       ];
-      Promise.all(getRecords).then((records) => {
-        resolve(records);
+      Promise.all(getRecords).then(() => {
+        resolve(allBrowserRecords);
       }, error => { reject(error); });
     }, error => { reject(error); });
 
