@@ -1,9 +1,9 @@
-let getHistory = require("./index");
+let history = require("./index");
 
 
 function singleRun() {
     return new Promise((res, rej) => {
-        getHistory().then(function (history) {
+        history.getAllHistory().then(function (history) {
             res(history);
         }).catch(function (error) {
             console.log("***** FAIL Single Run Test *****");
@@ -16,7 +16,7 @@ function concurrencyLockTest() {
     console.log("Running Concurrency Lock Test");
     let pass = true;
     for (let x = 0; x < 100; x++) {
-        getHistory().then(function (history) {
+      history.getAllHistory().then(function (history) {
             //Don't comment this in unless you want to see 100x the same history
             //console.log(history);
         }).catch(function (someError) {
