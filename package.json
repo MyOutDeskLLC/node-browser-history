@@ -1,6 +1,6 @@
 {
   "name": "node-browser-history",
-  "version": "0.0.40",
+  "version": "0.0.42",
   "description": "This application aims to retrieve browser history from all browsers on the user's computer. It will attempt to read from some common locations.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "engine": {
-    "node": "8.2.1"
+    "node": "8.1.1"
   },
   "repository": {
     "type": "git",
