@@ -1,6 +1,6 @@
 {
   "name": "node-browser-history",
-  "version": "0.0.46",
+  "version": "0.0.47",
   "description": "This application aims to retrieve browser history from all browsers on the user's computer. It will attempt to read from some common locations.",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,17 @@
   },
   "engine": {
     "node": "8.1.1"
+  },
+  "build": {
+    "extraResources": [],
+    "win": {
+      "extraResources": [
+        "./*.dll"
+      ]
+    },
+    "osx": {
+      "extraResources": []
+    }
   },
   "repository": {
     "type": "git",
