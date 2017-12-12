@@ -6,6 +6,9 @@
   "scripts": {
     "test": "node test.js"
   },
+  "engine": {
+    "node": "8.2.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MyOutDeskLLC/node-browser-history.git"
