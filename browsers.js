@@ -1,5 +1,5 @@
 const path = require('path'),
-      fs      = require('fs');
+      fs   = require('fs');
 
 const CHROME           = 'Google Chrome',
       FIREFOX          = 'Mozilla Firefox',
@@ -11,35 +11,41 @@ const CHROME           = 'Google Chrome',
       MAXTHON          = 'Maxthon',
       INTERNETEXPLORER = 'Internet Explorer';
 
-
-let basePath = '',
-    paths    = {};
+let paths = {
+  chrome:    '',
+  firefox:   '',
+  opera:     '',
+  ie:        '',
+  torch:     '',
+  seamonkey: '',
+  vivaldi:   '',
+  maxthon:   '',
+  safari:    ''
+};
 
 if (process.env.os === 'Windows_NT') {
 
-  basePath = path.join(process.env.HOMEDRIVE, 'Users', process.env.USERNAME, 'AppData');
-  paths    = {
-    chrome:    path.join(basePath, 'Local', 'Google', 'Chrome'),
-    firefox:   path.join(basePath, 'Roaming', 'Mozilla', 'Firefox'),
-    opera:     path.join(basePath, 'Roaming', 'Opera Software'),
-    ie:        path.join(basePath, 'Local', 'Microsoft', 'Windows', 'History', 'History.IE5'),
-    edge:      path.join(basePath, 'Local', 'Packages'),
-    torch:     path.join(basePath, 'Local', 'Torch', 'User Data'),
-    seamonkey: path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey')
-  };
+  let basePath = path.join(process.env.HOMEDRIVE, 'Users', process.env.USERNAME, 'AppData');
+
+  paths.chrome    = path.join(basePath, 'Local', 'Google', 'Chrome');
+  paths.firefox   = path.join(basePath, 'Roaming', 'Mozilla', 'Firefox');
+  paths.opera     = path.join(basePath, 'Roaming', 'Opera Software');
+  paths.ie        = path.join(basePath, 'Local', 'Microsoft', 'Windows', 'History', 'History.IE5');
+  paths.edge      = path.join(basePath, 'Local', 'Packages');
+  paths.torch     = path.join(basePath, 'Local', 'Torch', 'User Data');
+  paths.seamonkey = path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey');
 
 }
 else {
   let homeDirectory = process.env.HOME;
-  paths             = {
-    chrome:    path.join(homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome'),
-    firefox:   path.join(homeDirectory, 'Library', 'Application Support', 'Firefox'),
-    safari:    path.join(homeDirectory, 'Library', 'Safari'),
-    opera:     path.join(homeDirectory, 'Library', 'Application Support', 'com.operasoftware.Opera'),
-    maxthon:   path.join(homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon'),
-    vivaldi:   path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default'),
-    seamonkey: path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles')
-  };
+
+  paths.chrome    = path.join(homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome');
+  paths.firefox   = path.join(homeDirectory, 'Library', 'Application Support', 'Firefox');
+  paths.safari    = path.join(homeDirectory, 'Library', 'Safari');
+  paths.opera     = path.join(homeDirectory, 'Library', 'Application Support', 'com.operasoftware.Opera');
+  paths.maxthon   = path.join(homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon');
+  paths.vivaldi   = path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default');
+  paths.seamonkey = path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles');
 }
 
 /**
@@ -86,22 +92,16 @@ function findFilesInDir (startPath, filter, regExp = new RegExp('.*')) {
  * @returns {Promise<array>}
  */
 function findPaths (path, browserName) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(resolve=> {
     switch (browserName) {
       case FIREFOX:
+      case SEAMONKEY:
         resolve(findFilesInDir(path, '.sqlite', /places.sqlite$/));
         break;
       case CHROME:
-        resolve(findFilesInDir(path, 'History', /History$/));
-        break;
       case TORCH:
-        resolve(findFilesInDir(path, 'History', /History$/));
-        break;
       case OPERA:
         resolve(findFilesInDir(path, 'History', /History$/));
-        break;
-      case SEAMONKEY:
-        resolve(findFilesInDir(path, 'places.sqlite', /places.sqlite$/));
         break;
       case VIVALDI:
         resolve(findFilesInDir(path, '.sqlite'));
@@ -119,8 +119,8 @@ function findPaths (path, browserName) {
 }
 
 module.exports = {
-  paths,
   findPaths,
+  paths,
   CHROME,
   FIREFOX,
   TORCH,
