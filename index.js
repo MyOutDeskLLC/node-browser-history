@@ -27,7 +27,7 @@ if (process.env.os === 'Windows_NT') {
     });
 }
 
-let records = [];
+let allBrowserRecords = [];
 
 /**
  * Runs the the proper function for the given browser. Some browsers follow the same standards as
@@ -42,8 +42,8 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
   return new Promise((resolve, reject) => {
     if (browserName === browsers.FIREFOX || browserName === browsers.SEAMONKEY) {
       getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
-        records = records.concat(foundRecords);
-        resolve(records);
+        allBrowserRecords = allBrowserRecords.concat(foundRecords);
+        resolve(allBrowserRecords);
       }, error => {
         reject(error);
       });
@@ -51,24 +51,24 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
     else if (browserName === browsers.CHROME || browserName === browsers.OPERA || browserName === browsers.TORCH ||
       browserName === browsers.VIVALDI) {
       getChromeBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
-        records = records.concat(foundRecords);
-        resolve(records);
+        allBrowserRecords = allBrowserRecords.concat(foundRecords);
+        resolve(allBrowserRecords);
       }, error => {
         reject(error);
       });
     }
     else if (browserName === browsers.MAXTHON) {
       getMaxthonBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
-        records = records.concat(foundRecords);
-        resolve(records);
+        allBrowserRecords = allBrowserRecords.concat(foundRecords);
+        resolve(allBrowserRecords);
       }, error => {
         reject(error);
       });
     }
     else if (browserName === browsers.SAFARI) {
       getSafariBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
-        records = records.concat(foundRecords);
-        resolve(records);
+        allBrowserRecords = allBrowserRecords.concat(foundRecords);
+        resolve(allBrowserRecords);
       }, error => {
         reject(error);
       });
@@ -80,8 +80,8 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
         return;
       }
       getInternetExplorerBasedBrowserRecords(historyTimeLength).then(foundRecords => {
-        records = records.concat(foundRecords);
-        resolve(records);
+        allBrowserRecords = allBrowserRecords.concat(foundRecords);
+        resolve(allBrowserRecords);
       }, error => {
         reject(error);
       });
@@ -415,7 +415,7 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
 }
 
 function getFirefoxHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.firefox, browsers.FIREFOX).then(foundPaths => {
@@ -434,7 +434,7 @@ function getFirefoxHistory (historyTimeLength = 5) {
 }
 
 function getSeaMonkeyHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.seamonkey, browsers.SEAMONKEY).then(foundPaths => {
@@ -453,7 +453,7 @@ function getSeaMonkeyHistory (historyTimeLength = 5) {
 }
 
 function getChromeHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.chrome, browsers.CHROME).then(foundPaths => {
@@ -472,7 +472,7 @@ function getChromeHistory (historyTimeLength = 5) {
 }
 
 function getOperaHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.opera, browsers.OPERA).then(foundPaths => {
@@ -491,7 +491,7 @@ function getOperaHistory (historyTimeLength = 5) {
 }
 
 function getTorchHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.torch, browsers.TORCH).then(foundPaths => {
@@ -510,7 +510,7 @@ function getTorchHistory (historyTimeLength = 5) {
 }
 
 function getSafariHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.safari, browsers.SAFARI).then(foundPaths => {
@@ -529,7 +529,7 @@ function getSafariHistory (historyTimeLength = 5) {
 }
 
 function getMaxthonHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.maxthon, browsers.MAXTHON).then(foundPaths => {
@@ -548,7 +548,7 @@ function getMaxthonHistory (historyTimeLength = 5) {
 }
 
 function getVivaldiHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.vivaldi, browsers.VIVALDI).then(foundPaths => {
@@ -567,7 +567,7 @@ function getVivaldiHistory (historyTimeLength = 5) {
 }
 
 function getIEHistory (historyTimeLength = 5) {
-  records = [];
+  let records = [];
   return new Promise((resolve, reject) => {
     let getRecords = [
       getBrowserHistory([], browsers.INTERNETEXPLORER, historyTimeLength)
@@ -585,7 +585,7 @@ function getIEHistory (historyTimeLength = 5) {
  * @returns {Promise<array>}
  */
 function getAllHistory (historyTimeLength = 5) {
-  records = [];
+  allBrowserRecords = [];
   return new Promise((resolve, reject) => {
     let getPaths = [
       browsers.findPaths(browsers.paths.firefox, browsers.FIREFOX).then(foundPaths => {
@@ -630,7 +630,7 @@ function getAllHistory (historyTimeLength = 5) {
 
       ];
       Promise.all(getRecords).then(() => {
-        resolve(records);
+        resolve(allBrowserRecords);
       }, error => { reject(error); });
     }, error => { reject(error); });
 
