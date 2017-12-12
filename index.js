@@ -11,7 +11,7 @@ let edge                       = null,
 if (process.env.os === 'Windows_NT') {
   // Check to see if electron is installed for people that want to use this with any electron applications
   if (process.versions.electron) {
-    edge = require('electron-edge');
+    edge = require('electron-edge-js');
   }
   else {
     edge = require('edge-js');
