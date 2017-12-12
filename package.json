@@ -1,6 +1,6 @@
 {
   "name": "node-browser-history",
-  "version": "0.0.37",
+  "version": "0.0.39",
   "description": "This application aims to retrieve browser history from all browsers on the user's computer. It will attempt to read from some common locations.",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,7 @@
   "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
   "dependencies": {
     "edge": "^7.10.1",
+    "electron-edge": "^6.5.5",
     "moment": "^2.19.4",
     "sqlite3": "^3.1.13",
     "uuid": "^3.1.0"

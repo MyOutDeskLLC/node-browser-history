@@ -9,7 +9,13 @@ let edge                       = null,
     getInternetExplorerHistory = null;
 
 if (process.env.os === 'Windows_NT') {
-  edge                       = require('edge');
+  // Check to see if electron is installed for people that want to use this with any electron applications
+  if (process.versions.electron) {
+    edge = require('electron-edge');
+  }
+  else {
+    edge = require('edge');
+  }
   browserHistoryDllPath      = 'dlls/IEHistoryFetcher.dll';
   getInternetExplorerHistory = edge.func(
     {
@@ -22,15 +28,15 @@ if (process.env.os === 'Windows_NT') {
 let records = [];
 
 //Browser Names
-const CHROME    = 'Google Chrome',
-      FIREFOX   = 'Mozilla Firefox',
-      TORCH     = 'Torch',
-      OPERA     = 'Opera',
-      SEAMONKEY = 'SeaMonkey',
-      VIVALDI   = 'Vivaldi',
-      SAFARI    = 'Safari',
-      MAXTHON   = 'Maxthon',
-      IE        = 'Internet Explorer';
+const CHROME           = 'Google Chrome',
+      FIREFOX          = 'Mozilla Firefox',
+      TORCH            = 'Torch',
+      OPERA            = 'Opera',
+      SEAMONKEY        = 'SeaMonkey',
+      VIVALDI          = 'Vivaldi',
+      SAFARI           = 'Safari',
+      MAXTHON          = 'Maxthon',
+      INTERNETEXPLORER = 'Internet Explorer';
 
 /**
  * Find all files recursively in specific folder with specific extension, e.g:
@@ -126,7 +132,7 @@ function getBrowserHistory (paths = [], browserName) {
         reject(error);
       });
     }
-    else if (browserName === CHROME || browserName === OPERA || browserName === TORCH || browserName == VIVALDI) {
+    else if (browserName === CHROME || browserName === OPERA || browserName === TORCH || browserName === VIVALDI) {
       getChromeBasedBrowserRecords(paths, browserName).then(foundRecords => {
         records = records.concat(foundRecords);
         resolve(records);
@@ -150,12 +156,21 @@ function getBrowserHistory (paths = [], browserName) {
         reject(error);
       });
     }
+
+    else if (browserName === INTERNETEXPLORER) {
+      getInternetExplorerBasedBrowserRecords().then(foundRecords => {
+        records = records.concat(foundRecords);
+        resolve(records);
+      }, error => {
+        reject(error);
+      });
+    }
+
   });
 }
 
 function getInternetExplorerBasedBrowserRecords () {
   let internetExplorerHistory = [];
-
   return new Promise((resolve, reject) => {
     getInternetExplorerHistory(null, (error, s) => {
       if (error) {
@@ -173,15 +188,14 @@ function getInternetExplorerBasedBrowserRecords () {
                 title:    record.Title,
                 utc_time: lastVisited.valueOf(),
                 url:      record.URL,
-                browser:  IE
+                browser:  INTERNETEXPLORER
               };
               res(newRecord);
             }));
           }
         });
         Promise.all(internetExplorerHistory).then((foundRecords) => {
-          records = records.concat(foundRecords);
-          resolve(records);
+          resolve(foundRecords);
         });
       }
     });
@@ -478,7 +492,7 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
 function getWindowsBrowserHistory (driveLetter, user) {
   records = [];
 
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     let basePath = path.join(driveLetter, 'Users', user, 'AppData');
     let paths    = {
       chrome:    path.join(basePath, 'Local', 'Google', 'Chrome'),
@@ -491,51 +505,47 @@ function getWindowsBrowserHistory (driveLetter, user) {
     };
 
     let getPaths = [
-      findPaths(paths.firefox, FIREFOX).then(function (foundPaths) {
+      findPaths(paths.firefox, FIREFOX).then(foundPaths => {
         paths.firefox = foundPaths;
       }),
-      findPaths(paths.chrome, CHROME).then(function (foundPaths) {
+      findPaths(paths.chrome, CHROME).then(foundPaths => {
         paths.chrome = foundPaths;
       }),
-      findPaths(paths.seamonkey, SEAMONKEY).then(function (foundPaths) {
+      findPaths(paths.seamonkey, SEAMONKEY).then(foundPaths => {
         paths.seamonkey = foundPaths;
       }),
-      findPaths(paths.opera, OPERA).then(function (foundPaths) {
+      findPaths(paths.opera, OPERA).then(foundPaths => {
         paths.opera = foundPaths;
       }),
-      findPaths(paths.torch, TORCH).then(function (foundPaths) {
+      findPaths(paths.torch, TORCH).then(foundPaths => {
         paths.torch = foundPaths;
       }),
 
-      getMicrosoftEdgePath(paths.edge).then(function (foundPaths) {
+      getMicrosoftEdgePath(paths.edge).then(foundPaths => {
         paths.edge = foundPaths;
       })
     ];
 
-    Promise.all(getPaths).then(function (values) {
+    Promise.all(getPaths).then(values => {
       let getRecords = [
         getBrowserHistory(paths.firefox, FIREFOX),
         getBrowserHistory(paths.seamonkey, SEAMONKEY),
         getBrowserHistory(paths.chrome, CHROME),
         getBrowserHistory(paths.opera, OPERA),
         getBrowserHistory(paths.torch, TORCH),
-        getInternetExplorerBasedBrowserRecords()
+        getBrowserHistory([], INTERNETEXPLORER)
 
       ];
-      Promise.all(getRecords).then(function (browserRecords) {
+      Promise.all(getRecords).then(browserRecords => {
         resolve(records);
-      }).catch(function (dbReadError) {
-        reject(dbReadError);
-      });
-    }).catch(function (err) {
-      reject(err);
-    });
+      }, error => { reject(error); });
+    }, error => { reject(error); });
   });
 }
 
 function getMacBrowserHistory (homeDirectory, user) {
   records = [];
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
 
     let paths    = {
       chrome:    path.join(homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome'),
@@ -548,29 +558,29 @@ function getMacBrowserHistory (homeDirectory, user) {
       seamonkey: path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles')
     };
     let getPaths = [
-      findPaths(paths.vivaldi, VIVALDI).then(function (foundPath) {
+      findPaths(paths.vivaldi, VIVALDI).then(foundPath => {
         paths.vivaldi = foundPath;
       }),
-      findPaths(paths.firefox, FIREFOX).then(function (foundPath) {
+      findPaths(paths.firefox, FIREFOX).then(foundPath => {
         paths.firefox = foundPath;
       }),
-      findPaths(paths.opera, OPERA).then(function (foundPath) {
+      findPaths(paths.opera, OPERA).then(foundPath => {
         paths.opera = foundPath;
       }),
-      findPaths(paths.chrome, CHROME).then(function (foundPath) {
+      findPaths(paths.chrome, CHROME).then(foundPath => {
         paths.chrome = foundPath;
       }),
-      findPaths(paths.safari, SAFARI).then(function (foundPath) {
+      findPaths(paths.safari, SAFARI).then(foundPath => {
         paths.safari = foundPath;
       }),
-      findPaths(paths.seamonkey, SEAMONKEY).then(function (foundPath) {
+      findPaths(paths.seamonkey, SEAMONKEY).then(foundPath => {
         paths.seamonkey = foundPath;
       }),
-      findPaths(paths.maxthon, MAXTHON).then(function (foundPath) {
+      findPaths(paths.maxthon, MAXTHON).then(foundPath => {
         paths.maxthon = foundPath;
       })
     ];
-    Promise.all(getPaths).then(function (values) {
+    Promise.all(getPaths).then(values => {
       let getRecords = [
         getBrowserHistory(paths.firefox, FIREFOX),
         getBrowserHistory(paths.chrome, CHROME),
@@ -581,32 +591,24 @@ function getMacBrowserHistory (homeDirectory, user) {
         getBrowserHistory(paths.maxthon, MAXTHON)
 
       ];
-      Promise.all(getRecords).then(function () {
+      Promise.all(getRecords).then(() => {
         resolve(records);
-      }).catch(function (dbReadError) {
-        reject(dbReadError);
-      });
-    }).catch(function (err) {
-      reject(err);
-    });
+      }, error => { reject(error); });
+    }, error => { reject(error); });
   });
 }
 
 function getHistory () {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     if (process.env.OS === 'Windows_NT') {
-      getWindowsBrowserHistory(process.env.HOMEDRIVE, process.env.USERNAME).then(function (browserHistory) {
+      getWindowsBrowserHistory(process.env.HOMEDRIVE, process.env.USERNAME).then(browserHistory => {
         resolve(browserHistory);
-      }).catch(function (err) {
-        reject(err);
-      });
+      }, error => { reject(error); });
     }
     else {
-      getMacBrowserHistory(process.env.HOME, process.env.USER).then(function (browserHistory) {
+      getMacBrowserHistory(process.env.HOME, process.env.USER).then(browserHistory => {
         resolve(browserHistory);
-      }).catch(function (err) {
-        reject(err);
-      });
+      }, error => { reject(error); });
     }
   });
 
