@@ -548,7 +548,26 @@ function getMaxthonHistory (historyTimeLength = 5) {
   });
 }
 
-function getInternetExplorerHistory (historyTimeLength = 5) {
+function getVivaldiHistory (historyTimeLength = 5) {
+  records = [];
+  return new Promise((resolve, reject) => {
+    let getPaths = [
+      browsers.findPaths(browsers.paths.vivaldi, browsers.VIVALDI).then(foundPaths => {
+        browsers.paths.vivaldi = foundPaths;
+      })
+    ];
+    Promise.all(getPaths).then(() => {
+      let getRecords = [
+        getBrowserHistory(browsers.paths.vivaldi, browsers.VIVALDI, historyTimeLength)
+      ];
+      Promise.all(getRecords).then(() => {
+        resolve(records);
+      }, error => { reject(error); });
+    }, error => { reject(error); });
+  });
+}
+
+function getIEHistory (historyTimeLength = 5) {
   records = [];
   return new Promise((resolve, reject) => {
     let getRecords = [
@@ -628,5 +647,6 @@ module.exports = {
   getTorchHistory,
   getSafariHistory,
   getMaxthonHistory,
-  getInternetExplorerHistory
+  getVivaldiHistory,
+  getIEHistory
 };
