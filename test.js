@@ -4,8 +4,8 @@ function testGetAllHistory () {
   console.log('***** RUNNING GET ALL HISTORY TEST *****');
   return new Promise(res => {
     history.getAllHistory(60).then(history => {
-      console.log(history);
       console.log('PASS GET ALL HISTORY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAILED TO GET ALL HISTORY *****');
@@ -19,6 +19,7 @@ function testGetChromeOnly () {
   return new Promise(res => {
     history.getChromeHistory(60).then(history => {
       console.log('PASS GET CHROME ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET CHROME ONLY *****');
@@ -32,6 +33,7 @@ function testFireFoxOnly () {
   return new Promise(res => {
     history.getFirefoxHistory(60).then(history => {
       console.log('PASS GET FIREFOX ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET FIREFOX ONLY *****');
@@ -45,6 +47,7 @@ function testSafariOnly () {
   return new Promise(res => {
     history.getSafariHistory(60).then(history => {
       console.log('PASS GET SAFARI ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET SAFARI ONLY *****');
@@ -58,6 +61,7 @@ function testOperaOnly () {
   return new Promise(res => {
     history.getOperaHistory(60).then(history => {
       console.log('PASS GET OPERA ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET OPERA ONLY *****');
@@ -71,6 +75,7 @@ function testSeaMonkeyOnly () {
   return new Promise(res => {
     history.getSeaMonkeyHistory(60).then(history => {
       console.log('PASS GET SEAMONKEY ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET SEAMONKEY ONLY *****');
@@ -84,6 +89,7 @@ function testVivaldiOnly () {
   return new Promise(res => {
     history.getVivaldiHistory(60).then(history => {
       console.log('PASS GET VIVALDI ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET VIVALDI ONLY *****');
@@ -97,6 +103,7 @@ function testMaxthonOnly () {
   return new Promise(res => {
     history.getMaxthonHistory(60).then(history => {
       console.log('PASS GET MAXTHON ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET MAXTHON ONLY *****');
@@ -114,6 +121,7 @@ function testInternetExplorerOnly () {
   return new Promise(res => {
     history.getIEHistory(60).then(history => {
       console.log('PASS GET INTERNET EXPLORER ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET INTERNET EXPLORER ONLY *****');
@@ -127,6 +135,7 @@ function testTorchOnly () {
   return new Promise(res => {
     history.getTorchHistory(60).then(history => {
       console.log('PASS GET TORCH ONLY');
+      console.log(history);
       res(history);
     }, error => {
       console.log('***** FAIL TO GET TORCH ONLY *****');
