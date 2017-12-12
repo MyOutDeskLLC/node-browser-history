@@ -43,7 +43,7 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
     if (browserName === browsers.FIREFOX || browserName === browsers.SEAMONKEY) {
       getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
         allBrowserRecords = allBrowserRecords.concat(foundRecords);
-        resolve(allBrowserRecords);
+        resolve(foundRecords);
       }, error => {
         reject(error);
       });
@@ -52,7 +52,7 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
       browserName === browsers.VIVALDI) {
       getChromeBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
         allBrowserRecords = allBrowserRecords.concat(foundRecords);
-        resolve(allBrowserRecords);
+        resolve(foundRecords);
       }, error => {
         reject(error);
       });
@@ -60,7 +60,7 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
     else if (browserName === browsers.MAXTHON) {
       getMaxthonBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
         allBrowserRecords = allBrowserRecords.concat(foundRecords);
-        resolve(allBrowserRecords);
+        resolve(foundRecords);
       }, error => {
         reject(error);
       });
@@ -68,7 +68,7 @@ function getBrowserHistory (paths = [], browserName, historyTimeLength) {
     else if (browserName === browsers.SAFARI) {
       getSafariBasedBrowserRecords(paths, browserName, historyTimeLength).then(foundRecords => {
         allBrowserRecords = allBrowserRecords.concat(foundRecords);
-        resolve(allBrowserRecords);
+        resolve(foundRecords);
       }, error => {
         reject(error);
       });
@@ -620,8 +620,8 @@ function getAllHistory (historyTimeLength = 5) {
         getBrowserHistory([], browsers.INTERNETEXPLORER, historyTimeLength)
 
       ];
-      Promise.all(getRecords).then(() => {
-        resolve(allBrowserRecords);
+      Promise.all(getRecords).then((records) => {
+        resolve(records);
       }, error => { reject(error); });
     }, error => { reject(error); });
 
