@@ -14,7 +14,7 @@ if (process.env.os === 'Windows_NT') {
     edge = require('electron-edge');
   }
   else {
-    edge = require('edge');
+    edge = require('edge-js');
   }
   browserHistoryDllPath      = 'dlls/IEHistoryFetcher.dll';
   getInternetExplorerHistory = edge.func(
