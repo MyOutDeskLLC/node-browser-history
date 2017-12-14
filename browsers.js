@@ -1,5 +1,5 @@
 const path = require('path'),
-      fs   = require('fs');
+      fs   = require('fs')
 
 const CHROME           = 'Google Chrome',
       FIREFOX          = 'Mozilla Firefox',
@@ -9,7 +9,7 @@ const CHROME           = 'Google Chrome',
       VIVALDI          = 'Vivaldi',
       SAFARI           = 'Safari',
       MAXTHON          = 'Maxthon',
-      INTERNETEXPLORER = 'Internet Explorer';
+      INTERNETEXPLORER = 'Internet Explorer'
 
 let paths = {
   chrome:    '',
@@ -21,31 +21,31 @@ let paths = {
   vivaldi:   '',
   maxthon:   '',
   safari:    ''
-};
+}
 
-if (process.env.os === 'Windows_NT') {
+if (process.platform !== 'darwin') {
 
-  let basePath = path.join(process.env.HOMEDRIVE, 'Users', process.env.USERNAME, 'AppData');
+  let basePath = path.join(process.env.HOMEDRIVE, 'Users', process.env.USERNAME, 'AppData')
 
-  paths.chrome    = path.join(basePath, 'Local', 'Google', 'Chrome');
-  paths.firefox   = path.join(basePath, 'Roaming', 'Mozilla', 'Firefox');
-  paths.opera     = path.join(basePath, 'Roaming', 'Opera Software');
-  paths.ie        = path.join(basePath, 'Local', 'Microsoft', 'Windows', 'History', 'History.IE5');
-  paths.edge      = path.join(basePath, 'Local', 'Packages');
-  paths.torch     = path.join(basePath, 'Local', 'Torch', 'User Data');
-  paths.seamonkey = path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey');
+  paths.chrome    = path.join(basePath, 'Local', 'Google', 'Chrome')
+  paths.firefox   = path.join(basePath, 'Roaming', 'Mozilla', 'Firefox')
+  paths.opera     = path.join(basePath, 'Roaming', 'Opera Software')
+  paths.ie        = path.join(basePath, 'Local', 'Microsoft', 'Windows', 'History', 'History.IE5')
+  paths.edge      = path.join(basePath, 'Local', 'Packages')
+  paths.torch     = path.join(basePath, 'Local', 'Torch', 'User Data')
+  paths.seamonkey = path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey')
 
 }
 else {
-  let homeDirectory = process.env.HOME;
+  let homeDirectory = process.env.HOME
 
-  paths.chrome    = path.join(homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome');
-  paths.firefox   = path.join(homeDirectory, 'Library', 'Application Support', 'Firefox');
-  paths.safari    = path.join(homeDirectory, 'Library', 'Safari');
-  paths.opera     = path.join(homeDirectory, 'Library', 'Application Support', 'com.operasoftware.Opera');
-  paths.maxthon   = path.join(homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon');
-  paths.vivaldi   = path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default');
-  paths.seamonkey = path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles');
+  paths.chrome    = path.join(homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome')
+  paths.firefox   = path.join(homeDirectory, 'Library', 'Application Support', 'Firefox')
+  paths.safari    = path.join(homeDirectory, 'Library', 'Safari')
+  paths.opera     = path.join(homeDirectory, 'Library', 'Application Support', 'com.operasoftware.Opera')
+  paths.maxthon   = path.join(homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon')
+  paths.vivaldi   = path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default')
+  paths.seamonkey = path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles')
 }
 
 /**
@@ -58,30 +58,30 @@ else {
  */
 function findFilesInDir (startPath, filter, regExp = new RegExp('.*')) {
 
-  let results = [];
+  let results = []
 
   if (!fs.existsSync(startPath)) {
     //console.log("no dir ", startPath);
-    return results;
+    return results
   }
 
-  let files = fs.readdirSync(startPath);
+  let files = fs.readdirSync(startPath)
   for (let i = 0; i < files.length; i++) {
-    let filename = path.join(startPath, files[i]);
+    let filename = path.join(startPath, files[i])
     if (!fs.existsSync(filename)) {
       //console.log('file doesn\'t exist ', startPath);
-      return results;
+      return results
     }
-    let stat = fs.lstatSync(filename);
+    let stat = fs.lstatSync(filename)
     if (stat.isDirectory()) {
-      results = results.concat(findFilesInDir(filename, filter, regExp)); //recurse
+      results = results.concat(findFilesInDir(filename, filter, regExp)) //recurse
     }
     else if (filename.indexOf(filter) >= 0 && regExp.test(filename)) {
       //console.log('-- found: ', filename);
-      results.push(filename);
+      results.push(filename)
     }
   }
-  return results;
+  return results
 }
 
 /**
@@ -92,30 +92,30 @@ function findFilesInDir (startPath, filter, regExp = new RegExp('.*')) {
  * @returns {Promise<array>}
  */
 function findPaths (path, browserName) {
-  return new Promise(resolve=> {
+  return new Promise(resolve => {
     switch (browserName) {
       case FIREFOX:
       case SEAMONKEY:
-        resolve(findFilesInDir(path, '.sqlite', /places.sqlite$/));
-        break;
+        resolve(findFilesInDir(path, '.sqlite', /places.sqlite$/))
+        break
       case CHROME:
       case TORCH:
       case OPERA:
-        resolve(findFilesInDir(path, 'History', /History$/));
-        break;
+        resolve(findFilesInDir(path, 'History', /History$/))
+        break
       case VIVALDI:
-        resolve(findFilesInDir(path, '.sqlite'));
-        break;
+        resolve(findFilesInDir(path, '.sqlite'))
+        break
       case SAFARI:
-        resolve(findFilesInDir(path, '.db', /History.db$/));
-        break;
+        resolve(findFilesInDir(path, '.db', /History.db$/))
+        break
       case MAXTHON:
-        resolve(findFilesInDir(path, '.dat', /History.dat$/));
+        resolve(findFilesInDir(path, '.dat', /History.dat$/))
       default:
-        resolve([]);
-        break;
+        resolve([])
+        break
     }
-  });
+  })
 }
 
 module.exports = {
@@ -130,5 +130,5 @@ module.exports = {
   SAFARI,
   MAXTHON,
   INTERNETEXPLORER
-};
+}
 
