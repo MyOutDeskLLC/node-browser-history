@@ -1,6 +1,6 @@
 {
   "name": "node-browser-history",
-  "version": "0.0.54",
+  "version": "0.0.55",
   "description": "This application aims to retrieve browser history from all browsers on the user's computer. It will attempt to read from some common locations.",
   "main": "index.js",
   "scripts": {
