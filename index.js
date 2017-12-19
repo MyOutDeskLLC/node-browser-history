@@ -13,7 +13,19 @@ if (process.platform === 'win32') {
   // Check to see if electron is installed for people that want to use this with any electron applications
   edge = process.versions.electron ? require('electron-edge-js') : require('edge-js')
 
-  browserHistoryDllPath      = path.join(__dirname, 'IEHistoryFetcher.dll')
+  if (!process.env.NODE_ENV) {
+
+    browserHistoryDllPath = path.resolve(
+      path.join(__dirname, '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll'))
+  }
+  //When using in electron register this dll as an external resource in your package.json file
+  else if (process.env.NODE_ENV === 'development') {
+    browserHistoryDllPath = path.resolve(path.join(__dirname, 'IEHistoryFetcher.dll'))
+  }
+  else {
+    browserHistoryDllPath = path.resolve(
+      path.join(__dirname, '..', '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll'))
+  }
   getInternetExplorerHistory = edge.func(
     {
       assemblyFile: browserHistoryDllPath,
