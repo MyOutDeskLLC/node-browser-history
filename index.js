@@ -21,7 +21,7 @@ if (process.platform === 'win32') {
     browserHistoryDllPath = path.resolve( path.join(      __dirname, '..', '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll'))
   }
   else{
-    browserHistoryDllPath = path.resolve(path.join(__dirname, 'IEHistoryFetcher.dll'))
+    browserHistoryDllPath = path.resolve(path.join(__dirname, 'dlls', 'IEHistoryFetcher.dll'))
   }
   getInternetExplorerHistory = edge.func(
     {
