@@ -14,10 +14,10 @@ if (process.platform === 'win32') {
   edge = process.versions.electron ? require('electron-edge-js') : require('edge-js')
 
   //When using in electron register this dll as an external resource in your package.json file
-  if(fs.exists(path.resolve(path.join(     __dirname, '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll')))){
-    browserHistoryDllPath = path.resolve(path.join( __dirname, '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll'))
+  if(fs.exists(path.join(__dirname, '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll'))){
+    browserHistoryDllPath = path.join( __dirname, '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll')
   }
-  else if(fs.exists(path.resolve( path.join(      __dirname, '..', '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll')))){
+  else if(fs.exists(path.join(      __dirname, '..', '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll'))){
     browserHistoryDllPath = path.resolve( path.join(      __dirname, '..', '..', '..', 'src', 'renderer', 'assets', 'dlls', 'IEHistoryFetcher.dll'))
   }
   else{
