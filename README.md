@@ -1,6 +1,6 @@
 # node-browser-history
 
-This module will gather browser history from common internet browsers. Only for the last 5 minutes.
+This module will gather browser history from common internet browsers. Given a time frame.
 > Operating Systems Supported
 
 * Windows (Partially Complete)
@@ -44,70 +44,103 @@ const BrowserHistory = require('node-browser-history');
 
 //Only All Support Browser History
 
-getAllHistory().then(function (history) {
+/**
+ * Gets the history for the Specified browsers and time in minutes.
+ * Returns an array of browser records.
+ * @param historyTimeLength | Integer
+ * @returns {Promise<array>}
+ */
+getAllHistory(10).then(function (history) {
   console.log(history);
 });
 
 
-//Only Retrieve Firefox History
 
-getFirefoxHistory().then(function (history) {
+/**
+ * Gets Firefox history
+ * @param historyTimeLength
+ * @returns {Promise<array>}
+ */
+getFirefoxHistory(10).then(function (history) {
   console.log(history);
 });
 
 
-//Only Retrieve Firefox History
-
-getSeaMonkeyHistory().then(function (history) {
+/**
+ * Gets Seamonkey History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getSeaMonkeyHistory(10).then(function (history) {
   console.log(history);
 });
 
 
-//Only Retrieve Chrome History
-
-getChromeHistory().then(function (history) {
+/**
+ * Gets Chrome History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getChromeHistory(10).then(function (history) {
   console.log(history);
 });
 
 
-//Only Retrieve Opera History
-
-getOperaHistory().then(function (history) {
+/**
+ * Get Opera History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getOperaHistory(10).then(function (history) {
   console.log(history);
 });
 
 
-//Only Retrieve Torch History
-
-getTorchHistory().then(function (history) {
+/**
+ * Get Torch History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getTorchHistory(10).then(function (history) {
   console.log(history);
 });
 
 
-//Only Retrieve Safari History (Mac Only)
-
-getSafariHistory().then(function (history) {
+/**
+ * Get Safari History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getSafariHistory(10).then(function (history) {
   console.log(history);
 });
 
 
-//Only Retrieve Maxthon History
+/**
+ * Get Maxthon History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getMaxthonHistory(10).then(function (history) {
+  console.log(history);
+});
 
-getMaxthonHistory().then(function (history) {
+/**
+ * Get Vivaldi History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getVivaldiHistory(10).then(function (history) {
   console.log(history);
 });
 
 
-//Only Retrieve Vivaldi History
-
-getVivaldiHistory().then(function (history) {
-  console.log(history);
-});
-
-
-//Only Retrieve Internet Explorer History
-
-getIEHistory().then(function (history) {
+/**
+ * Get Internet Explorer History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getIEHistory(10).then(function (history) {
   console.log(history);
 });
 ```

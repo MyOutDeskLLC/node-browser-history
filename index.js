@@ -110,16 +110,17 @@ function getInternetExplorerBasedBrowserRecords (historyTimeLength) {
         s.forEach(record => {
           let lastVisited = moment.utc(record.LastVisited)
           if (lastVisited > fiveMinutesAgo) {
-            internetExplorerHistory.push(new Promise(res => {
-              let newRecord = {
-
-                title:    record.Title,
-                utc_time: lastVisited.valueOf(),
-                url:      record.URL,
-                browser:  browsers.INTERNETEXPLORER
-              }
-              res(newRecord)
-            }))
+            if(!record.url.startsWith("file:///")) {
+              internetExplorerHistory.push(new Promise(res => {
+                let newRecord = {
+                  title:    record.Title,
+                  utc_time: lastVisited.valueOf(),
+                  url:      record.URL,
+                  browser:  browsers.INTERNETEXPLORER
+                }
+                res(newRecord)
+              }))
+            }
           }
         })
         Promise.all(internetExplorerHistory).then((foundRecords) => {
@@ -421,6 +422,11 @@ function getMicrosoftEdgePath (microsoftEdgePath) {
   })
 }
 
+/**
+ * Gets Firefox history
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getFirefoxHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -443,6 +449,11 @@ function getFirefoxHistory (historyTimeLength = 5) {
   })
 }
 
+/**
+ * Gets Seamonkey History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getSeaMonkeyHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -461,6 +472,11 @@ function getSeaMonkeyHistory (historyTimeLength = 5) {
   })
 }
 
+/**
+ * Gets Chrome History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getChromeHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -479,6 +495,11 @@ function getChromeHistory (historyTimeLength = 5) {
   })
 }
 
+/**
+ * Get Opera History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getOperaHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -497,6 +518,11 @@ function getOperaHistory (historyTimeLength = 5) {
   })
 }
 
+/**
+ * Get Torch History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getTorchHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -515,6 +541,11 @@ function getTorchHistory (historyTimeLength = 5) {
   })
 }
 
+/**
+ * Get Safari History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getSafariHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -533,6 +564,11 @@ function getSafariHistory (historyTimeLength = 5) {
   })
 }
 
+/**
+ * Get Maxthon History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getMaxthonHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -551,6 +587,11 @@ function getMaxthonHistory (historyTimeLength = 5) {
   })
 }
 
+/**
+ * Get Vivaldi History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getVivaldiHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getPaths = [
@@ -569,6 +610,11 @@ function getVivaldiHistory (historyTimeLength = 5) {
   })
 }
 
+/**
+ * Get Internet Explorer History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
 function getIEHistory (historyTimeLength = 5) {
   return new Promise((resolve, reject) => {
     let getRecords = [
