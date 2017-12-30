@@ -110,7 +110,7 @@ function getInternetExplorerBasedBrowserRecords (historyTimeLength) {
         s.forEach(record => {
           let lastVisited = moment.utc(record.LastVisited)
           if (lastVisited > fiveMinutesAgo) {
-            if(!record.url.startsWith("file:///")) {
+            if(!record.URL.startsWith("file:///")) {
               internetExplorerHistory.push(new Promise(res => {
                 let newRecord = {
                   title:    record.Title,
