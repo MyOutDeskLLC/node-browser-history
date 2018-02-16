@@ -17,7 +17,7 @@ function testGetAllHistory () {
 function testGetChromeOnly () {
   console.log('***** RUNNING GET CHROME ONLY *****')
   return new Promise(res => {
-    history.getChromeHistory(60).then(history => {
+    history.getChromeHistory(5).then(history => {
       console.log('PASS GET CHROME ONLY')
       console.log(history)
       res(history)
@@ -145,7 +145,7 @@ function testTorchOnly () {
 }
 
 let tests = [
-  //testGetChromeOnly(),
+  testGetChromeOnly(),
   //testFireFoxOnly(),
   //testSafariOnly(),
   //testOperaOnly(),
@@ -154,7 +154,7 @@ let tests = [
   //testMaxthonOnly(),
   //testInternetExplorerOnly(),
   //testTorchOnly(),
-  testGetAllHistory()
+  //testGetAllHistory()
 ]
 
 Promise.all(tests).then(() => {
