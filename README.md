@@ -38,7 +38,7 @@ This module will gather browser history from common internet browsers. Given a t
 
 # How to Use
 
-``` 
+```javascript
 const BrowserHistory = require('node-browser-history');
 
 
