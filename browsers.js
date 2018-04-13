@@ -11,7 +11,19 @@ const CHROME           = 'Google Chrome',
       MAXTHON          = 'Maxthon',
       INTERNETEXPLORER = 'Internet Explorer'
 
-let paths = {
+let browserDbLocations = {
+  chrome:    '',
+  firefox:   '',
+  opera:     '',
+  ie:        '',
+  torch:     '',
+  seamonkey: '',
+  vivaldi:   '',
+  maxthon:   '',
+  safari:    ''
+}
+
+let defaultPaths = {
   chrome:    '',
   firefox:   '',
   opera:     '',
@@ -27,25 +39,25 @@ if (process.platform !== 'darwin') {
 
   let basePath = path.join(process.env.HOMEDRIVE, 'Users', process.env.USERNAME, 'AppData')
 
-  paths.chrome    = path.join(basePath, 'Local', 'Google', 'Chrome')
-  paths.firefox   = path.join(basePath, 'Roaming', 'Mozilla', 'Firefox')
-  paths.opera     = path.join(basePath, 'Roaming', 'Opera Software')
-  paths.ie        = path.join(basePath, 'Local', 'Microsoft', 'Windows', 'History', 'History.IE5')
-  paths.edge      = path.join(basePath, 'Local', 'Packages')
-  paths.torch     = path.join(basePath, 'Local', 'Torch', 'User Data')
-  paths.seamonkey = path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey')
+  defaultPaths.chrome    = path.join(basePath, 'Local', 'Google', 'Chrome')
+  defaultPaths.firefox   = path.join(basePath, 'Roaming', 'Mozilla', 'Firefox')
+  defaultPaths.opera     = path.join(basePath, 'Roaming', 'Opera Software')
+  defaultPaths.ie        = path.join(basePath, 'Local', 'Microsoft', 'Windows', 'History', 'History.IE5')
+  defaultPaths.edge      = path.join(basePath, 'Local', 'Packages')
+  defaultPaths.torch     = path.join(basePath, 'Local', 'Torch', 'User Data')
+  defaultPaths.seamonkey = path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey')
 
 }
 else {
   let homeDirectory = process.env.HOME
 
-  paths.chrome    = path.join(homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome')
-  paths.firefox   = path.join(homeDirectory, 'Library', 'Application Support', 'Firefox')
-  paths.safari    = path.join(homeDirectory, 'Library', 'Safari')
-  paths.opera     = path.join(homeDirectory, 'Library', 'Application Support', 'com.operasoftware.Opera')
-  paths.maxthon   = path.join(homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon')
-  paths.vivaldi   = path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default')
-  paths.seamonkey = path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles')
+  defaultPaths.chrome    = path.join(homeDirectory, 'Library', 'Application Support', 'Google', 'Chrome')
+  defaultPaths.firefox   = path.join(homeDirectory, 'Library', 'Application Support', 'Firefox')
+  defaultPaths.safari    = path.join(homeDirectory, 'Library', 'Safari')
+  defaultPaths.opera     = path.join(homeDirectory, 'Library', 'Application Support', 'com.operasoftware.Opera')
+  defaultPaths.maxthon   = path.join(homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon')
+  defaultPaths.vivaldi   = path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default')
+  defaultPaths.seamonkey = path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles')
 }
 
 /**
@@ -91,36 +103,30 @@ function findFilesInDir (startPath, filter, regExp = new RegExp('.*')) {
  * @param browserName
  * @returns {Promise<array>}
  */
-function findPaths (path, browserName) {
-  return new Promise(resolve => {
+async function findPaths (path, browserName) {
     switch (browserName) {
       case FIREFOX:
       case SEAMONKEY:
-        resolve(findFilesInDir(path, '.sqlite', /places.sqlite$/))
-        break
+        return findFilesInDir(path, '.sqlite', /places.sqlite$/)
       case CHROME:
       case TORCH:
       case OPERA:
-        resolve(findFilesInDir(path, 'History', /History$/))
-        break
+        return findFilesInDir(path, 'History', /History$/)
       case VIVALDI:
-        resolve(findFilesInDir(path, '.sqlite'))
-        break
+        return findFilesInDir(path, '.sqlite')
       case SAFARI:
-        resolve(findFilesInDir(path, '.db', /History.db$/))
-        break
+        return findFilesInDir(path, '.db', /History.db$/)
       case MAXTHON:
-        resolve(findFilesInDir(path, '.dat', /History.dat$/))
+        return findFilesInDir(path, '.dat', /History.dat$/)
       default:
-        resolve([])
-        break
+        return []
     }
-  })
 }
 
 module.exports = {
   findPaths,
-  paths,
+  browserDbLocations,
+  defaultPaths,
   CHROME,
   FIREFOX,
   TORCH,

@@ -3,7 +3,7 @@ let history = require('./index')
 function testGetAllHistory () {
   console.log('***** RUNNING GET ALL HISTORY TEST *****')
   return new Promise(res => {
-    history.getAllHistory(60).then(history => {
+    history.getAllHistory(10).then(history => {
       console.log('PASS GET ALL HISTORY')
       console.log(history)
       res(history)
@@ -145,7 +145,7 @@ function testTorchOnly () {
 }
 
 let tests = [
-  testGetChromeOnly(),
+  //testGetChromeOnly(),
   //testFireFoxOnly(),
   //testSafariOnly(),
   //testOperaOnly(),
@@ -154,12 +154,21 @@ let tests = [
   //testMaxthonOnly(),
   //testInternetExplorerOnly(),
   //testTorchOnly(),
-  //testGetAllHistory()
+  // testGetAllHistory()
 ]
 
-Promise.all(tests).then(() => {
-  console.log('PASSING ALL TESTS')
-  process.exit(0)
-}, error => {
-  process.exit(error)
-})
+//Promise.all(tests).then(() => {
+//  console.log('PASSING ALL TESTS')
+//  process.exit(0)
+//}, error => {
+//  process.exit(error)
+//})
+
+
+setInterval(()=>{
+  testGetAllHistory();
+},5000)
+
+
+
+
