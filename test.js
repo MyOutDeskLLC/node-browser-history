@@ -164,10 +164,11 @@ let tests = [
 //  process.exit(error)
 //})
 
+testGetAllHistory()
 
-setInterval(()=>{
-  testGetAllHistory();
-},5000)
+// setInterval(()=>{
+//   testGetAllHistory();
+// },2000)
 
 
 

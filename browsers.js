@@ -101,9 +101,9 @@ function findFilesInDir (startPath, filter, regExp = new RegExp('.*')) {
  * Returns an array of strings, paths, or an empty array
  * @param path
  * @param browserName
- * @returns {Promise<array>}
+ * @returns {Array}
  */
-async function findPaths (path, browserName) {
+function findPaths (path, browserName) {
     switch (browserName) {
       case FIREFOX:
       case SEAMONKEY:
