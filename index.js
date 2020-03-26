@@ -54,6 +54,7 @@ async function getBrowserHistory (paths = [], browserName, historyTimeLength) {
       case browsers.OPERA:
       case browsers.TORCH:
       case browsers.VIVALDI:
+      case browsers.BRAVE:
         return await getChromeBasedBrowserRecords(paths, browserName, historyTimeLength)
 
       case browsers.MAXTHON:
@@ -477,6 +478,27 @@ async function getTorchHistory (historyTimeLength = 5) {
 }
 
 /**
+ * Get Brave History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+async function getBraveHistory (historyTimeLength = 5) {
+  let getPaths = [
+    browsers.findPaths(browsers.defaultPaths.brave, browsers.BRAVE).then(foundPaths => {
+      browsers.browserDbLocations.brave = foundPaths
+    })
+  ]
+  Promise.all(getPaths).then(() => {
+    let getRecords = [
+      getBrowserHistory(browsers.browserDbLocations.brave, browsers.BRAVE, historyTimeLength)
+    ]
+    Promise.all(getRecords).then((records) => {
+      return records
+    }, error => { throw error })
+  }, error => { throw error })
+}
+
+/**
  * Get Safari History
  * @param historyTimeLength time is in minutes
  * @returns {Promise<array>}
@@ -567,6 +589,7 @@ async function getAllHistory (historyTimeLength = 5) {
   browsers.browserDbLocations.seamonkey = browsers.findPaths(browsers.defaultPaths.seamonkey, browsers.SEAMONKEY)
   browsers.browserDbLocations.opera     = browsers.findPaths(browsers.defaultPaths.opera, browsers.OPERA)
   browsers.browserDbLocations.torch     = browsers.findPaths(browsers.defaultPaths.torch, browsers.TORCH)
+  browsers.browserDbLocations.brave     = browsers.findPaths(browsers.defaultPaths.brave, browsers.BRAVE)
   browsers.browserDbLocations.safari    = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI)
   browsers.browserDbLocations.seamonkey = browsers.findPaths(browsers.defaultPaths.seamonkey, browsers.SEAMONKEY)
   browsers.browserDbLocations.maxthon   = browsers.findPaths(browsers.defaultPaths.maxthon, browsers.MAXTHON)
@@ -577,6 +600,7 @@ async function getAllHistory (historyTimeLength = 5) {
   allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.chrome, browsers.CHROME, historyTimeLength))
   allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.opera, browsers.OPERA, historyTimeLength))
   allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.torch, browsers.TORCH, historyTimeLength))
+  allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.brave, browsers.BRAVE, historyTimeLength))
   allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength))
   allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.vivaldi, browsers.VIVALDI, historyTimeLength))
   allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength))
@@ -594,6 +618,7 @@ module.exports = {
   getChromeHistory,
   getOperaHistory,
   getTorchHistory,
+  getBraveHistory,
   getSafariHistory,
   getMaxthonHistory,
   getVivaldiHistory,

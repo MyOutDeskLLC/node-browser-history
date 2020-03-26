@@ -16,6 +16,7 @@ This module will gather browser history from common internet browsers. Given a t
 ![SeaMonkey](https://i.imgur.com/OgTBYE8.png)
 ![Torch](https://i.imgur.com/9xB5ReO.png)
 ![Vivaldi](https://i.imgur.com/GTy9hXK.png)
+![Brave](https://i.imgur.com/SEWgLIJ.png)
 
 * Google Chrome
 * Internet Explorer (Windows Only)
@@ -27,6 +28,7 @@ This module will gather browser history from common internet browsers. Given a t
 * Seamonkey
 * Torch (Windows Only)
 * Vivaldi (Mac Only)
+* Brave
 
 # How to Install
 
@@ -102,6 +104,16 @@ getOperaHistory(10).then(function (history) {
  * @returns {Promise<array>}
  */
 getTorchHistory(10).then(function (history) {
+  console.log(history);
+});
+
+
+/**
+ * Get Brave History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+getBraveHistory(10).then(function (history) {
   console.log(history);
 });
 

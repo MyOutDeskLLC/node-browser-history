@@ -9,7 +9,8 @@ const CHROME           = 'Google Chrome',
       VIVALDI          = 'Vivaldi',
       SAFARI           = 'Safari',
       MAXTHON          = 'Maxthon',
-      INTERNETEXPLORER = 'Internet Explorer'
+      INTERNETEXPLORER = 'Internet Explorer',
+      BRAVE            = 'Brave'
 
 let browserDbLocations = {
   chrome:    '',
@@ -20,7 +21,8 @@ let browserDbLocations = {
   seamonkey: '',
   vivaldi:   '',
   maxthon:   '',
-  safari:    ''
+  safari:    '',
+  brave:     ''
 }
 
 let defaultPaths = {
@@ -32,7 +34,8 @@ let defaultPaths = {
   seamonkey: '',
   vivaldi:   '',
   maxthon:   '',
-  safari:    ''
+  safari:    '',
+  brave:     ''
 }
 
 if (process.platform !== 'darwin') {
@@ -46,7 +49,7 @@ if (process.platform !== 'darwin') {
   defaultPaths.edge      = path.join(basePath, 'Local', 'Packages')
   defaultPaths.torch     = path.join(basePath, 'Local', 'Torch', 'User Data')
   defaultPaths.seamonkey = path.join(basePath, 'Roaming', 'Mozilla', 'SeaMonkey')
-
+  defaultPaths.brave     = path.join(basePath, 'Local', 'BraveSoftware', 'Brave-Browser', 'User Data')
 }
 else {
   let homeDirectory = process.env.HOME
@@ -58,6 +61,7 @@ else {
   defaultPaths.maxthon   = path.join(homeDirectory, 'Library', 'Application Support', 'com.maxthon.mac.Maxthon')
   defaultPaths.vivaldi   = path.join(homeDirectory, 'Library', 'Application Support', 'Vivaldi', 'Default')
   defaultPaths.seamonkey = path.join(homeDirectory, 'Library', 'Application Support', 'SeaMonkey', 'Profiles')
+  defaultPaths.brave     = path.join(homeDirectory, 'Library', 'Application Support', 'BraveSoftware', 'Brave-Browser')
 }
 
 /**
@@ -111,6 +115,7 @@ function findPaths (path, browserName) {
       case CHROME:
       case TORCH:
       case OPERA:
+      case BRAVE:
         return findFilesInDir(path, 'History', /History$/)
       case VIVALDI:
         return findFilesInDir(path, '.sqlite')
@@ -135,6 +140,7 @@ module.exports = {
   VIVALDI,
   SAFARI,
   MAXTHON,
-  INTERNETEXPLORER
+  INTERNETEXPLORER,
+  BRAVE
 }
 
