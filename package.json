@@ -35,8 +35,7 @@
   },
   "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
   "dependencies": {
-    "edge-js": "10.3.0",
-    "electron-edge-js": "12.13.0",
+    "electron-edge-js": "^12.13.0",
     "moment": "2.19.4",
     "sqlite-async": "^1.0.12",
     "sqlite3": "4.1.1",
