@@ -1,6 +1,5 @@
 const path    = require("path"),
       fs      = require("fs"),
-      sqlite3 = require("sqlite3").verbose(),
       uuidV4  = require("uuid/v4"),
       moment  = require("moment");
 const sqlite3Async = require('sqlite-async')
@@ -11,8 +10,7 @@ let edge                       = null,
     browsers                   = require("./browsers")
 
 if (process.platform === "win32") {
-  // Check to see if electron is installed for people that want to use this with any electron applications
-  edge = process.versions.electron ? require("electron-edge-js") : require("edge-js")
+  edge = require("electron-edge-js");
 
   if (fs.existsSync(
     path.resolve(path.join(__dirname, "..", "..", "src", "renderer", "assets", "dlls", "IEHistoryFetcher.dll")))) {
