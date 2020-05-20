@@ -144,6 +144,20 @@ function testTorchOnly () {
   })
 }
 
+function testBraveOnly () {
+  console.log('***** RUNNING GET BRAVE ONLY *****')
+  return new Promise(res => {
+    history.getBraveHistory(60).then(history => {
+      console.log('PASS GET BRAVE ONLY')
+      console.log(history)
+      res(history)
+    }, error => {
+      console.log('***** FAIL TO GET BRAVE ONLY *****')
+      throw (error)
+    })
+  })
+}
+
 let tests = [
   //testGetChromeOnly(),
   //testFireFoxOnly(),
@@ -154,6 +168,7 @@ let tests = [
   //testMaxthonOnly(),
   //testInternetExplorerOnly(),
   //testTorchOnly(),
+  //testBraveOnly(),
   // testGetAllHistory()
 ]
 
