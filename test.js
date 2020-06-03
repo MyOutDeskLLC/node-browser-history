@@ -168,18 +168,18 @@ let tests = [
   //testMaxthonOnly(),
   //testInternetExplorerOnly(),
   //testTorchOnly(),
-  //testBraveOnly(),
+  testBraveOnly(),
   // testGetAllHistory()
 ]
 
-//Promise.all(tests).then(() => {
-//  console.log('PASSING ALL TESTS')
-//  process.exit(0)
-//}, error => {
-//  process.exit(error)
-//})
+Promise.all(tests).then(() => {
+ console.log('PASSING ALL TESTS')
+ process.exit(0)
+}, error => {
+ process.exit(error)
+})
 
-testGetAllHistory()
+// testGetAllHistory()
 
 // setInterval(()=>{
 //   testGetAllHistory();
