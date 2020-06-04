@@ -9,14 +9,14 @@ const CHROME = "Google Chrome",
     VIVALDI = "Vivaldi",
     SAFARI = "Safari",
     MAXTHON = "Maxthon",
-    INTERNETEXPLORER = "Internet Explorer",
+    EDGE = "Microsoft Edge",
     BRAVE = "Brave";
 
 let browserDbLocations = {
     chrome: "",
     firefox: "",
     opera: "",
-    ie: "",
+    edge: "",
     torch: "",
     seamonkey: "",
     vivaldi: "",
@@ -29,7 +29,7 @@ let defaultPaths = {
     chrome: "",
     firefox: "",
     opera: "",
-    ie: "",
+    edge: "",
     torch: "",
     seamonkey: "",
     vivaldi: "",
@@ -46,7 +46,7 @@ if (process.platform !== "darwin") {
     defaultPaths.firefox = path.join(basePath, "Roaming", "Mozilla", "Firefox");
     defaultPaths.opera = path.join(basePath, "Roaming", "Opera Software");
     defaultPaths.ie = path.join(basePath, "Local", "Microsoft", "Windows", "History", "History.IE5");
-    defaultPaths.edge = path.join(basePath, "Local", "Packages");
+    // defaultPaths.edge = path.join(basePath, "Local", "Packages");
     defaultPaths.torch = path.join(basePath, "Local", "Torch", "User Data");
     defaultPaths.seamonkey = path.join(basePath, "Roaming", "Mozilla", "SeaMonkey");
     defaultPaths.brave = path.join(basePath, "Local", "BraveSoftware", "Brave-Browser", "User Data");
@@ -55,10 +55,11 @@ if (process.platform !== "darwin") {
 
     defaultPaths.chrome = path.join(homeDirectory, "Library", "Application Support", "Google", "Chrome");
     defaultPaths.firefox = path.join(homeDirectory, "Library", "Application Support", "Firefox");
+    defaultPaths.edge = path.join(homeDirectory, "Library", "Application Support", "Microsoft Edge");
     defaultPaths.safari = path.join(homeDirectory, "Library", "Safari");
     defaultPaths.opera = path.join(homeDirectory, "Library", "Application Support", "com.operasoftware.Opera");
     defaultPaths.maxthon = path.join(homeDirectory, "Library", "Application Support", "com.maxthon.mac.Maxthon");
-    defaultPaths.vivaldi = path.join(homeDirectory, "Library", "Application Support", "Vivaldi", "Default");
+    defaultPaths.vivaldi = path.join(homeDirectory, "Library", "Application Support", "Vivaldi");
     defaultPaths.seamonkey = path.join(homeDirectory, "Library", "Application Support", "SeaMonkey", "Profiles");
     defaultPaths.brave = path.join(homeDirectory, "Library", "Application Support", "BraveSoftware", "Brave-Browser");
 }
@@ -72,9 +73,7 @@ if (process.platform !== "darwin") {
  * @return {Array}               Result files with path string in an array
  */
 function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
-
     let results = [];
-
     if (!fs.existsSync(startPath)) {
         //console.log("no dir ", startPath);
         return results;
@@ -106,6 +105,7 @@ function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
  * @returns {Array}
  */
 function findPaths(path, browserName) {
+    console.log(browserName)
     switch (browserName) {
         case FIREFOX:
         case SEAMONKEY:
@@ -114,13 +114,13 @@ function findPaths(path, browserName) {
         case TORCH:
         case OPERA:
         case BRAVE:
-            return findFilesInDir(path, "History", /History$/);
         case VIVALDI:
-            return findFilesInDir(path, ".sqlite");
+        case EDGE:
+            return findFilesInDir(path, "History", /History$/);
         case SAFARI:
-            return findFilesInDir(path, ".db", /History.db$/);
+            return findFilesInDir(path, ".db", /History\.db$/);
         case MAXTHON:
-            return findFilesInDir(path, ".dat", /History.dat$/);
+            return findFilesInDir(path, ".dat", /History\.dat$/);
         default:
             return [];
     }
@@ -139,5 +139,6 @@ module.exports = {
     SAFARI,
     MAXTHON,
     BRAVE,
+    EDGE
 };
 

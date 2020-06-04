@@ -158,19 +158,34 @@ function testBraveOnly() {
     });
 }
 
+function testMicrosoftEdgeOnly() {
+    console.log("***** RUNNING GET MICROSOFT EDGE ONLY *****");
+    return new Promise(res => {
+        history.getMicrosoftEdge(300).then(history => {
+            console.log("PASS GET MICROSOFT EDGE ONLY");
+            console.log(history);
+            res(history);
+        }, error => {
+            console.log("***** FAIL TO GET MICROSOFT EDGE ONLY *****");
+            throw (error);
+        });
+    });
+}
+
+
 let tests = [
     // testGetChromeOnly(),
     // testFireFoxOnly(),
     // testBraveOnly(),
-
-    testSafariOnly(),
     // testOperaOnly(),
     // testSeaMonkeyOnly(),
-    // testVivaldiOnly(),
     // testMaxthonOnly(),
-    // testInternetExplorerOnly(),
+    // testVivaldiOnly(),
+
+    // testMicrosoftEdgeOnly(),
+    // testSafariOnly(),
     // testTorchOnly(),
-    // testGetAllHistory(),
+    testGetAllHistory(),
 ];
 
 Promise.all(tests).then(() => {

@@ -26,6 +26,7 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
         case browsers.TORCH:
         case browsers.VIVALDI:
         case browsers.BRAVE:
+        case browsers.EDGE:
             return await getChromeBasedBrowserRecords(paths, browserName, historyTimeLength);
 
         case browsers.MAXTHON:
@@ -61,14 +62,14 @@ async function getHistoryFromDb(newDbPath, sql, browserName) {
     return browserHistory;
 }
 
-function copyDbAndWalFile(dbPath){
-    const newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+function copyDbAndWalFile(dbPath, fileExtension = 'sqlite') {
+    const newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + `.${fileExtension}`);
     const filePaths = {};
-    filePaths.db = newDbPath
-    filePaths.dbWal = `${newDbPath}-wal`
+    filePaths.db = newDbPath;
+    filePaths.dbWal = `${newDbPath}-wal`;
     fs.copyFileSync(dbPath, filePaths.db);
     fs.copyFileSync(dbPath, filePaths.dbWal);
-    return filePaths
+    return filePaths;
 }
 
 async function forceWalFileDump(dbPath, newDbPath) {
@@ -88,21 +89,22 @@ function deleteTempFiles(paths) {
 }
 
 async function getChromeBasedBrowserRecords(paths, browserName, historyTimeLength) {
+    console.log(paths);
+    console.log('******************************')
     if (!paths || paths.length === 0) {
         return [];
     }
     let newDbPaths = [];
     let browserHistory = [];
-    console.log(paths)
-    for (let p in paths) {
-        if (paths.hasOwnProperty(p) && paths[p] !== "") {
-            let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
-            newDbPaths.push(newDbPath);
-            let sql = `SELECT title, datetime(last_visit_time/1000000 + (strftime('%s', '1601-01-01')),'unixepoch') last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
-            //Assuming the sqlite file is locked so lets make a copy of it
-            fs.copyFileSync(paths[p], newDbPath);
-            browserHistory.push(await getHistoryFromDb(newDbPath, sql, browserName));
-        }
+    console.log(paths);
+    for (let i = 0; i < paths.length; i++) {
+        let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+        console.log(paths[i])
+        newDbPaths.push(newDbPath);
+        let sql = `SELECT title, datetime(last_visit_time/1000000 + (strftime('%s', '1601-01-01')),'unixepoch') last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
+        //Assuming the sqlite file is locked so lets make a copy of it
+        fs.copyFileSync(paths[i], newDbPath);
+        browserHistory.push(await getHistoryFromDb(newDbPath, sql, browserName));
     }
     deleteTempFiles(newDbPaths);
     return browserHistory;
@@ -115,168 +117,44 @@ async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLeng
     let newDbPaths = [];
     let browserHistory = [];
     for (let i = 0; i < paths.length; i++) {
-        if (paths[i] || paths[i] !== "") {
-            const tmpFilePaths = copyDbAndWalFile(paths[i])
-            newDbPaths.push(tmpFilePaths.db)
-            let sql = `SELECT title, datetime(last_visit_date/1000000,'unixepoch') last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
-            await forceWalFileDump(paths[i], tmpFilePaths.db);
-            browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName, true));
-        }
+        const tmpFilePaths = copyDbAndWalFile(paths[i]);
+        newDbPaths.push(tmpFilePaths.db);
+        let sql = `SELECT title, datetime(last_visit_date/1000000,'unixepoch') last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
+        await forceWalFileDump(paths[i], tmpFilePaths.db);
+        browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName, true));
     }
     deleteTempFiles(newDbPaths);
     return browserHistory;
 
 }
 
-function getMaxthonBasedBrowserRecords(paths, browserName, historyTimeLength) {
-    let browserHistory = [],
-        h = [];
-    return new Promise((resolve, reject) => {
-        if (!paths || paths.length === 0) {
-            resolve(browserHistory);
-        }
-        for (let i = 0; i < paths.length; i++) {
-            if (paths[i] || paths[i] !== "") {
-
-                let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".db");
-
-                //Assuming the sqlite file is locked so lets make a copy of it
-                const originalDB = new Database(paths[i]);
-                originalDB.serialize(() => {
-                    // This has to be called to merge .db-wall, the in memory db, to disk so we can access the history when
-                    // safari is open
-                    originalDB.run("PRAGMA wal_checkpoint(FULL)");
-                    originalDB.close(() => {
-                        let readStream = fs.createReadStream(paths[i]),
-                            writeStream = fs.createWriteStream(newDbPath),
-                            stream = readStream.pipe(writeStream);
-
-                        stream.on("finish", function() {
-                            const db = new Database(newDbPath);
-                            db.serialize(() => {
-                                db.run("PRAGMA wal_checkpoint(FULL)");
-                                db.each(
-                                    "SELECT `zlastvisittime`, `zhost`, `ztitle`, `zurl` FROM   zmxhistoryentry WHERE  Datetime (`zlastvisittime` + 978307200, 'unixepoch') >= Datetime('now', '-" +
-                                    historyTimeLength + " minutes')",
-                                    function(err, row) {
-                                        if (err) {
-                                            reject(err);
-                                        } else {
-                                            let t = moment.unix(Math.floor(row.ZLASTVISITTIME + 978307200));
-                                            browserHistory.push(
-                                                {
-                                                    title: row.ZTITLE,
-                                                    utc_time: t.valueOf(),
-                                                    url: row.ZURL,
-                                                    browser: browserName,
-                                                });
-                                        }
-                                    });
-
-                                db.close(() => {
-                                    fs.unlink(newDbPath, (err) => {
-                                        if (err) {
-                                            return reject(err);
-                                        }
-                                    });
-                                    resolve(browserHistory);
-                                });
-                            });
-                        });
-                    });
-
-                });
-            }
-        }
-    });
+async function getSafariBasedBrowserRecords(paths, browserName, historyTimeLength) {
+    if (!paths || paths.length === 0) {
+        return [];
+    }
+    let newDbPaths = [];
+    let browserHistory = [];
+    for (let i = 0; i < paths.length; i++) {
+        const tmpFilePaths = copyDbAndWalFile(paths[i]);
+        newDbPaths.push(tmpFilePaths.db);
+        let sql = `SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} + " minutes')`;
+        await forceWalFileDump(paths[i], tmpFilePaths.db);
+        browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName, true));
+    }
+    deleteTempFiles(newDbPaths);
+    return browserHistory;
 }
 
-function getSafariBasedBrowserRecords(paths, browserName, historyTimeLength) {
-    let browserHistory = [],
-        h = [];
-    return new Promise((resolve, reject) => {
-        if (!paths || paths.length === 0) {
-            resolve(browserHistory);
-        }
-        for (let i = 0; i < paths.length; i++) {
-            if (paths[i] || paths[i] !== "") {
 
-                let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".db");
-                let sql = `SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} + " minutes')`;
-                //Assuming the sqlite file is locked so lets make a copy of it
-                const originalDB = new Database(paths[i]);
-                originalDB.serialize(() => {
-                    // This has to be called to merge .db-wall, the in memory db, to disk so we can access the history when
-                    // safari is open
-                    originalDB.run("PRAGMA wal_checkpoint(FULL)");
-                    originalDB.close(() => {
-                        let readStream = fs.createReadStream(paths[i]),
-                            writeStream = fs.createWriteStream(newDbPath),
-                            stream = readStream.pipe(writeStream);
-
-                        stream.on("finish", function() {
-                            const db = new Database(newDbPath);
-                            db.serialize(() => {
-                                db.run("PRAGMA wal_checkpoint(FULL)");
-                                db.each(
-                                    "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-" + historyTimeLength + " minutes')",
-                                    function(err, row) {
-                                        if (err) {
-                                            reject(err);
-                                        } else {
-                                            let t = moment.unix(Math.floor(row.visit_time + 978307200));
-                                            browserHistory.push(
-                                                {
-                                                    title: row.title,
-                                                    utc_time: t.valueOf(),
-                                                    url: row.url,
-                                                    browser: browserName,
-                                                });
-                                        }
-                                    });
-
-                                db.close(() => {
-                                    fs.unlink(newDbPath, (err) => {
-                                        if (err) {
-                                            return reject(err);
-                                        }
-                                    });
-                                    resolve(browserHistory);
-                                });
-                            });
-                        });
-                    });
-
-                });
-            }
-        }
-    });
-}
-
-function getMicrosoftEdgePath(microsoftEdgePath) {
-    return new Promise(function(resolve, reject) {
-        fs.readdir(microsoftEdgePath, function(err, files) {
-            if (err) {
-                resolve(null);
-                return;
-            }
-            for (let i = 0; i < files.length; i++) {
-                if (files[i].indexOf("Microsoft.MicrosoftEdge") !== -1) {
-                    microsoftEdgePath = path.join(
-                        microsoftEdgePath, files[i], "AC", "MicrosoftEdge", "User", "Default", "DataStore", "Data",
-                        "nouser1");
-                    break;
-                }
-            }
-            fs.readdir(microsoftEdgePath, function(err2, files2) {
-                if (err) {
-                    resolve(null);
-                }
-                //console.log(path.join(microsoftEdgePath, files2[0], "DBStore", "spartan.edb"));
-                resolve(path.join(microsoftEdgePath, files2[0], "DBStore", "spartan.edb"));
-            });
-        });
-    });
+async function getMaxthonBasedBrowserRecords(paths, browserName, historyTimeLength) {
+    let newDbPaths = [];
+    let browserHistory = [];
+    for (let i = 0; i < paths.length; i++) {
+        let sql = `SELECT zlastvisittime last_visit_time, zhost host, ztitle title, zurl url FROM zmxhistoryentry WHERE  Datetime (zlastvisittime + 978307200, 'unixepoch') >= Datetime('now', '-${historyTimeLength} minutes')`;
+        browserHistory.push(await getHistoryFromDb(paths[i], sql, browserName, true));
+    }
+    deleteTempFiles(newDbPaths);
+    return browserHistory;
 }
 
 /**
@@ -386,7 +264,17 @@ async function getVivaldiHistory(historyTimeLength = 5) {
         return records;
     });
 }
-
+/**
+ * Get Microsoft Edge History
+ * @param historyTimeLength time is in minutes
+ * @returns {Promise<array>}
+ */
+async function getMicrosoftEdge(historyTimeLength = 5) {
+    browsers.browserDbLocations.edge = browsers.findPaths(browsers.defaultPaths.edge, browsers.EDGE);
+    return getBrowserHistory(browsers.browserDbLocations.edge, browsers.EDGE, historyTimeLength).then(records => {
+        return records;
+    });
+}
 
 /**
  * Gets the history for the Specified browsers and time in minutes.
@@ -403,10 +291,11 @@ async function getAllHistory(historyTimeLength = 5) {
     browsers.browserDbLocations.opera = browsers.findPaths(browsers.defaultPaths.opera, browsers.OPERA);
     browsers.browserDbLocations.torch = browsers.findPaths(browsers.defaultPaths.torch, browsers.TORCH);
     browsers.browserDbLocations.brave = browsers.findPaths(browsers.defaultPaths.brave, browsers.BRAVE);
-    browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
+    // browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
     browsers.browserDbLocations.seamonkey = browsers.findPaths(browsers.defaultPaths.seamonkey, browsers.SEAMONKEY);
     browsers.browserDbLocations.maxthon = browsers.findPaths(browsers.defaultPaths.maxthon, browsers.MAXTHON);
     browsers.browserDbLocations.vivaldi = browsers.findPaths(browsers.defaultPaths.vivaldi, browsers.VIVALDI);
+    browsers.browserDbLocations.edge = browsers.findPaths(browsers.defaultPaths.edge, browsers.EDGE);
 
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.firefox, browsers.FIREFOX, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength));
@@ -414,10 +303,11 @@ async function getAllHistory(historyTimeLength = 5) {
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.opera, browsers.OPERA, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.torch, browsers.TORCH, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.brave, browsers.BRAVE, historyTimeLength));
-    allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength));
+    // allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.vivaldi, browsers.VIVALDI, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.maxthon, browsers.MAXTHON, historyTimeLength));
+    allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.edge, browsers.EDGE, historyTimeLength));
     //No Path because this is handled by the dll
 
     return allBrowserRecords;
@@ -434,5 +324,6 @@ module.exports = {
     getSafariHistory,
     getMaxthonHistory,
     getVivaldiHistory,
+    getMicrosoftEdge,
 };
 
