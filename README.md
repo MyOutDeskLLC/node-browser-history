@@ -17,11 +17,11 @@ This module will gather browser history from common internet browsers. Given a t
 ![Torch](https://i.imgur.com/9xB5ReO.png)
 ![Vivaldi](https://i.imgur.com/GTy9hXK.png)
 ![Brave](https://i.imgur.com/SEWgLIJ.png)
+![Microsoft Edge](https://i.imgur.com/Iyd33UT.png)
 
 * Google Chrome
-* Internet Explorer (Windows Only)
 * Maxthon (Mac Only)
-* Microsoft Edge (Coming Soon)
+* Microsoft Edge
 * Mozilla Firefox
 * Opera
 * Safari (Mac Only)
