@@ -20,8 +20,7 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
     switch (browserName) {
         case browsers.FIREFOX:
         case browsers.SEAMONKEY:
-            return await getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength);
-
+            return getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength);
         case browsers.CHROME:
         case browsers.OPERA:
         case browsers.TORCH:
@@ -46,145 +45,81 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
             return [];
     }
 }
-
-function getInternetExplorerBasedBrowserRecords(historyTimeLength) {
-    let internetExplorerHistory = [];
-    return new Promise((resolve, reject) => {
-        getInternetExplorerHistory(null, (error, s) => {
-            if (error) {
-                throw(error);
-            } else {
-                let currentTime = moment.utc();
-                let fiveMinutesAgo = currentTime.subtract(historyTimeLength, "minutes");
-                s.forEach(record => {
-                    let lastVisited = moment.utc(record.LastVisited);
-                    if (lastVisited > fiveMinutesAgo) {
-                        if (!record.URL.startsWith("file:///")) {
-                            internetExplorerHistory.push({
-                                title: record.Title,
-                                utc_time: lastVisited.valueOf(),
-                                url: record.URL,
-                                browser: browsers.INTERNETEXPLORER,
-                            });
-                        }
-                    }
-                });
-                resolve(internetExplorerHistory);
-            }
-        });
+async function getHistoryFromDb(dbPath, newDbPath, sql, browserName){
+    //Assuming the sqlite file is locked so lets make a copy of it
+    fs.copyFileSync(dbPath, newDbPath);
+    const db = await Database.open(newDbPath)
+    const rows = await db.all(sql)
+    console.log(rows)
+    let browserHistory = rows.map(row => {
+        return {
+            title: row.title,
+            utc_time: row.last_visit_time,
+            url: row.url,
+            browser: browserName,
+        };
     });
+    await db.close()
+    return browserHistory;
 }
 
-function getChromeBasedBrowserRecords(paths, browserName, historyTimeLength) {
-    return new Promise((resolve, reject) => {
-
-        if (!paths || paths.length === 0) {
-            return resolve([]);
+async function getChromeBasedBrowserRecords(paths, browserName, historyTimeLength) {
+    if (!paths || paths.length === 0) {
+        return [];
+    }
+    let newDbPaths = [];
+    let browserHistory = [];
+    for (let p in paths) {
+        if (paths.hasOwnProperty(p) && paths[p] !== "") {
+            let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+            newDbPaths.push(newDbPath)
+            let sql = `SELECT title, datetime(last_visit_time/1000000 + (strftime('%s', '1601-01-01')),'unixepoch') last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes')`;
+            //Assuming the sqlite file is locked so lets make a copy of it
+            fs.copyFileSync(paths[p], newDbPath);
+            console.log(newDbPath)
+            browserHistory.push(await getHistoryFromDb(paths[p], newDbPath, sql, browserName))
         }
-
-        let promises = [];
-        for (let p in paths) {
-            if (paths.hasOwnProperty(p) && paths[p] !== "") {
-                let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
-                //Assuming the sqlite file is locked so lets make a copy of it
-                fs.copyFileSync(paths[p], newDbPath);
-                promises.push(new Promise((resolve, reject) => {
-                    let browserHistory = [];
-                    Database.open(newDbPath).then(db => {
-                        let sql = `SELECT title, last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes')`;
-                        db.all(sql).then(rows => {
-                            browserHistory = rows.map(row => {
-                                return {
-                                    title: row.title,
-                                    utc_time: moment.unix(row.last_visit_time / 1000000 - 11644473600).valueOf(),
-                                    url: row.url,
-                                    browser: browserName,
-                                };
-                            });
-                            db.close().then(() => {
-                                console.log(browserHistory);
-                                resolve(browserHistory);
-                            }).catch(error => {
-                                reject(error);
-                            });
-                        }).catch(error => {
-                            reject(error);
-                        });
-                    });
-                }));
-            }
-        }
-        Promise.all(promises).then(history => {
-            resolve(history);
-        }).catch(error => {
-            reject(error)
-        });
-    });
+    }
+    deleteTempFiles(newDbPaths);
+    return browserHistory;
 }
 
-function getHistory(dbPath, browserName, historyTimeLength) {
-
+function deleteTempFiles(paths){
+    paths.forEach(path=>{
+        fs.unlinkSync(path);
+    })
 }
 
-function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength) {
-    let browserHistory = [],
-        h = [];
-    return new Promise((resolve, reject) => {
-        if (!paths || paths.length === 0) {
-            resolve(browserHistory);
-        }
-        for (let i = 0; i < paths.length; i++) {
-            if (paths[i] || paths[i] !== "") {
 
-                let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength) {
+    if (!paths || paths.length === 0) {
+        return [];
+    }
+    let newDbPaths = [];
+    let browserHistory = [];
+    for (let i = 0; i < paths.length; i++) {
+        if (paths[i] || paths[i] !== "") {
+            const db = await Database.open(paths[i])
+            try{
 
-                //Assuming the sqlite file is locked so lets make a copy of it
-                const originalDB = new Database(paths[i]);
-                originalDB.serialize(() => {
-                    // This has to be called to merge .db-wall, the in memory db, to disk so we can access the history when
-                    // the browser is open
-                    originalDB.run("PRAGMA wal_checkpoint(FULL)");
-                    originalDB.close(() => {
-
-                        //Assuming the sqlite file is locked so lets make a copy of it
-                        let readStream = fs.createReadStream(paths[i]),
-                            writeStream = fs.createWriteStream(newDbPath),
-                            stream = readStream.pipe(writeStream);
-
-                        stream.on("finish", function() {
-                            const db = new Database(newDbPath);
-                            db.serialize(function() {
-                                db.each(
-                                    "SELECT title, last_visit_date, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-" +
-                                    historyTimeLength + " minutes')",
-                                    function(err, row) {
-                                        if (err) {
-                                            reject(err);
-                                        } else {
-                                            let t = moment.unix(row.last_visit_date / 1000000);
-                                            browserHistory.push({
-                                                title: row.title,
-                                                utc_time: t.valueOf(),
-                                                url: row.url,
-                                                browser: browserName,
-                                            });
-                                        }
-                                    });
-                                db.close(() => {
-                                    fs.unlink(newDbPath, (err) => {
-                                        if (err) {
-                                            return reject(err);
-                                        }
-                                    });
-                                    resolve(browserHistory);
-                                });
-                            });
-                        });
-                    });
-                });
+            //Flush Memory Changes to Disk
+            await db.run('PRAGMA wal_checkpoint(FULL)')
             }
+            catch (e) {
+                console.log(e)
+            }
+            // db.close()
+            let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+            // tempDatabases.push(newDbPath);
+            //Assuming the sqlite file is locked so lets make a copy of it
+            fs.copyFileSync(paths[i], newDbPath);
+            console.log(newDbPath);
+            let sql = `SELECT title, last_visit_date last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '- + ${historyTimeLength} minutes')`;
+            browserHistory.push(await getHistoryFromDb(paths[i], newDbPath, sql, browserName));
         }
-    });
+    }
+    deleteTempFiles(newDbPaths);
+    return browserHistory;
 
 }
 
@@ -345,23 +280,10 @@ function getMicrosoftEdgePath(microsoftEdgePath) {
  * @param historyTimeLength time is in minutes
  * @returns {Promise<array>}
  */
-function getFirefoxHistory(historyTimeLength = 5) {
-    let getPaths = [
-        browsers.findPaths(browsers.defaultPaths.firefox, browsers.FIREFOX).then(foundPaths => {
-            browsers.browserDbLocations.firefox = foundPaths;
-        }),
-    ];
-    Promise.all(getPaths).then(() => {
-        let getRecords = [
-            getBrowserHistory(browsers.browserDbLocations.firefox, browsers.FIREFOX, historyTimeLength),
-        ];
-        Promise.all(getRecords).then((records) => {
-            return records;
-        }, error => {
-            throw error;
-        });
-    }, error => {
-        throw error;
+async function getFirefoxHistory(historyTimeLength = 5) {
+    browsers.browserDbLocations.firefox = browsers.findPaths(browsers.defaultPaths.firefox, browsers.FIREFOX);
+    return getBrowserHistory(browsers.browserDbLocations.firefox, browsers.FIREFOX, historyTimeLength).then(records => {
+        return records;
     });
 }
 

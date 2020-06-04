@@ -160,7 +160,7 @@ function testBraveOnly () {
 
 let tests = [
   //testGetChromeOnly(),
-  //testFireFoxOnly(),
+  testFireFoxOnly(),
   //testSafariOnly(),
   //testOperaOnly(),
   //testSeaMonkeyOnly(),
@@ -168,7 +168,7 @@ let tests = [
   //testMaxthonOnly(),
   //testInternetExplorerOnly(),
   //testTorchOnly(),
-  testBraveOnly(),
+  // testBraveOnly(),
   // testGetAllHistory()
 ]
 

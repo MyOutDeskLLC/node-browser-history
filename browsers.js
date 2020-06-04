@@ -84,14 +84,14 @@ function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
     for (let i = 0; i < files.length; i++) {
         let filename = path.join(startPath, files[i]);
         if (!fs.existsSync(filename)) {
-            //console.log('file doesn\'t exist ', startPath);
+            // console.log('file doesn\'t exist ', startPath);
             return results;
         }
         let stat = fs.lstatSync(filename);
         if (stat.isDirectory()) {
             results = results.concat(findFilesInDir(filename, filter, regExp)); //recurse
         } else if (filename.indexOf(filter) >= 0 && regExp.test(filename)) {
-            //console.log('-- found: ', filename);
+            // console.log('-- found: ', filename);
             results.push(filename);
         }
     }
