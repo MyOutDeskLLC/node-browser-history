@@ -105,7 +105,6 @@ function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
  * @returns {Array}
  */
 function findPaths(path, browserName) {
-    console.log(browserName)
     switch (browserName) {
         case FIREFOX:
         case SEAMONKEY:

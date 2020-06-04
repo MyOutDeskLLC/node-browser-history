@@ -89,17 +89,13 @@ function deleteTempFiles(paths) {
 }
 
 async function getChromeBasedBrowserRecords(paths, browserName, historyTimeLength) {
-    console.log(paths);
-    console.log('******************************')
     if (!paths || paths.length === 0) {
         return [];
     }
     let newDbPaths = [];
     let browserHistory = [];
-    console.log(paths);
     for (let i = 0; i < paths.length; i++) {
         let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
-        console.log(paths[i])
         newDbPaths.push(newDbPath);
         let sql = `SELECT title, datetime(last_visit_time/1000000 + (strftime('%s', '1601-01-01')),'unixepoch') last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
         //Assuming the sqlite file is locked so lets make a copy of it
