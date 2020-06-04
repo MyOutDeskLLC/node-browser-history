@@ -109,7 +109,7 @@ function findPaths(path, browserName) {
     switch (browserName) {
         case FIREFOX:
         case SEAMONKEY:
-            return findFilesInDir(path, ".sqlite", /places.sqlite$/);
+            return findFilesInDir(path, ".sqlite", /places\.sqlite$/);
         case CHROME:
         case TORCH:
         case OPERA:

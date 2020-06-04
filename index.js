@@ -45,12 +45,10 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
             return [];
     }
 }
-async function getHistoryFromDb(dbPath, newDbPath, sql, browserName){
-    //Assuming the sqlite file is locked so lets make a copy of it
-    fs.copyFileSync(dbPath, newDbPath);
-    const db = await Database.open(newDbPath)
-    const rows = await db.all(sql)
-    console.log(rows)
+
+async function getHistoryFromDb(newDbPath, sql, browserName) {
+    const db = await Database.open(newDbPath);
+    const rows = await db.all(sql);
     let browserHistory = rows.map(row => {
         return {
             title: row.title,
@@ -59,8 +57,34 @@ async function getHistoryFromDb(dbPath, newDbPath, sql, browserName){
             browser: browserName,
         };
     });
-    await db.close()
+    await db.close();
     return browserHistory;
+}
+
+function copyDbAndWalFile(dbPath){
+    const newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
+    const filePaths = {};
+    filePaths.db = newDbPath
+    filePaths.dbWal = `${newDbPath}-wal`
+    fs.copyFileSync(dbPath, filePaths.db);
+    fs.copyFileSync(dbPath, filePaths.dbWal);
+    return filePaths
+}
+
+async function forceWalFileDump(dbPath, newDbPath) {
+    const db = await Database.open(newDbPath);
+
+    // If the browser uses a wal file we need to create a wal file with the same filename as our temp database.
+    // Call wal checkpoint on it so it dumps to the original database. Finally re-copy the original database into the same temporary database. This will have the good data.
+    await db.run("PRAGMA wal_checkpoint(FULL)");
+    await db.close();
+    fs.copyFileSync(dbPath, newDbPath);
+}
+
+function deleteTempFiles(paths) {
+    paths.forEach(path => {
+        fs.unlinkSync(path);
+    });
 }
 
 async function getChromeBasedBrowserRecords(paths, browserName, historyTimeLength) {
@@ -69,27 +93,20 @@ async function getChromeBasedBrowserRecords(paths, browserName, historyTimeLengt
     }
     let newDbPaths = [];
     let browserHistory = [];
+    console.log(paths)
     for (let p in paths) {
         if (paths.hasOwnProperty(p) && paths[p] !== "") {
             let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
-            newDbPaths.push(newDbPath)
-            let sql = `SELECT title, datetime(last_visit_time/1000000 + (strftime('%s', '1601-01-01')),'unixepoch') last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes')`;
+            newDbPaths.push(newDbPath);
+            let sql = `SELECT title, datetime(last_visit_time/1000000 + (strftime('%s', '1601-01-01')),'unixepoch') last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
             //Assuming the sqlite file is locked so lets make a copy of it
             fs.copyFileSync(paths[p], newDbPath);
-            console.log(newDbPath)
-            browserHistory.push(await getHistoryFromDb(paths[p], newDbPath, sql, browserName))
+            browserHistory.push(await getHistoryFromDb(newDbPath, sql, browserName));
         }
     }
     deleteTempFiles(newDbPaths);
     return browserHistory;
 }
-
-function deleteTempFiles(paths){
-    paths.forEach(path=>{
-        fs.unlinkSync(path);
-    })
-}
-
 
 async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLength) {
     if (!paths || paths.length === 0) {
@@ -99,23 +116,11 @@ async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLeng
     let browserHistory = [];
     for (let i = 0; i < paths.length; i++) {
         if (paths[i] || paths[i] !== "") {
-            const db = await Database.open(paths[i])
-            try{
-
-            //Flush Memory Changes to Disk
-            await db.run('PRAGMA wal_checkpoint(FULL)')
-            }
-            catch (e) {
-                console.log(e)
-            }
-            // db.close()
-            let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".sqlite");
-            // tempDatabases.push(newDbPath);
-            //Assuming the sqlite file is locked so lets make a copy of it
-            fs.copyFileSync(paths[i], newDbPath);
-            console.log(newDbPath);
-            let sql = `SELECT title, last_visit_date last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '- + ${historyTimeLength} minutes')`;
-            browserHistory.push(await getHistoryFromDb(paths[i], newDbPath, sql, browserName));
+            const tmpFilePaths = copyDbAndWalFile(paths[i])
+            newDbPaths.push(tmpFilePaths.db)
+            let sql = `SELECT title, datetime(last_visit_date/1000000,'unixepoch') last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
+            await forceWalFileDump(paths[i], tmpFilePaths.db);
+            browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName, true));
         }
     }
     deleteTempFiles(newDbPaths);
@@ -197,7 +202,7 @@ function getSafariBasedBrowserRecords(paths, browserName, historyTimeLength) {
             if (paths[i] || paths[i] !== "") {
 
                 let newDbPath = path.join(process.env.TMP ? process.env.TMP : process.env.TMPDIR, uuidV4() + ".db");
-
+                let sql = `SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} + " minutes')`;
                 //Assuming the sqlite file is locked so lets make a copy of it
                 const originalDB = new Database(paths[i]);
                 originalDB.serialize(() => {
@@ -214,8 +219,7 @@ function getSafariBasedBrowserRecords(paths, browserName, historyTimeLength) {
                             db.serialize(() => {
                                 db.run("PRAGMA wal_checkpoint(FULL)");
                                 db.each(
-                                    "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-" +
-                                    historyTimeLength + " minutes')",
+                                    "SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-" + historyTimeLength + " minutes')",
                                     function(err, row) {
                                         if (err) {
                                             reject(err);
@@ -293,22 +297,9 @@ async function getFirefoxHistory(historyTimeLength = 5) {
  * @returns {Promise<array>}
  */
 function getSeaMonkeyHistory(historyTimeLength = 5) {
-    let getPaths = [
-        browsers.findPaths(browsers.defaultPaths.seamonkey, browsers.SEAMONKEY).then(foundPaths => {
-            browsers.browserDbLocations.seamonkey = foundPaths;
-        }),
-    ];
-    Promise.all(getPaths).then(() => {
-        let getRecords = [
-            getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength),
-        ];
-        Promise.all(getRecords).then((records) => {
-            return records;
-        }, error => {
-            throw error;
-        });
-    }, error => {
-        throw error;
+    browsers.browserDbLocations.seamonkey = browsers.findPaths(browsers.defaultPaths.seamonkey, browsers.SEAMONKEY);
+    return getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength).then(records => {
+        return records;
     });
 }
 
@@ -318,22 +309,9 @@ function getSeaMonkeyHistory(historyTimeLength = 5) {
  * @returns {Promise<array>}
  */
 async function getChromeHistory(historyTimeLength = 5) {
-    let getPaths = [
-        browsers.findPaths(browsers.defaultPaths.chrome, browsers.CHROME).then(foundPaths => {
-            browsers.browserDbLocations.chrome = foundPaths;
-        }),
-    ];
-    Promise.all(getPaths).then(() => {
-        let getRecords = [
-            getBrowserHistory(browsers.browserDbLocations.chrome, browsers.CHROME, historyTimeLength),
-        ];
-        Promise.all(getRecords).then((records) => {
-            return records;
-        }, error => {
-            throw error;
-        });
-    }, error => {
-        throw error;
+    browsers.browserDbLocations.chrome = browsers.findPaths(browsers.defaultPaths.chrome, browsers.CHROME);
+    return getBrowserHistory(browsers.browserDbLocations.chrome, browsers.CHROME, historyTimeLength).then(records => {
+        return records;
     });
 }
 
@@ -343,22 +321,9 @@ async function getChromeHistory(historyTimeLength = 5) {
  * @returns {Promise<array>}
  */
 async function getOperaHistory(historyTimeLength = 5) {
-    let getPaths = [
-        browsers.findPaths(browsers.defaultPaths.opera, browsers.OPERA).then(foundPaths => {
-            browsers.browserDbLocations.opera = foundPaths;
-        }),
-    ];
-    Promise.all(getPaths).then(() => {
-        let getRecords = [
-            getBrowserHistory(browsers.browserDbLocations.opera, browsers.OPERA, historyTimeLength),
-        ];
-        Promise.all(getRecords).then((records) => {
-            return records;
-        }, error => {
-            throw error;
-        });
-    }, error => {
-        throw error;
+    browsers.browserDbLocations.opera = browsers.findPaths(browsers.defaultPaths.opera, browsers.OPERA);
+    return getBrowserHistory(browsers.browserDbLocations.opera, browsers.OPERA, historyTimeLength).then(records => {
+        return records;
     });
 }
 
@@ -368,22 +333,9 @@ async function getOperaHistory(historyTimeLength = 5) {
  * @returns {Promise<array>}
  */
 async function getTorchHistory(historyTimeLength = 5) {
-    let getPaths = [
-        browsers.findPaths(browsers.defaultPaths.torch, browsers.TORCH).then(foundPaths => {
-            browsers.browserDbLocations.torch = foundPaths;
-        }),
-    ];
-    Promise.all(getPaths).then(() => {
-        let getRecords = [
-            getBrowserHistory(browsers.browserDbLocations.torch, browsers.TORCH, historyTimeLength),
-        ];
-        Promise.all(getRecords).then((records) => {
-            return records;
-        }, error => {
-            throw error;
-        });
-    }, error => {
-        throw error;
+    browsers.browserDbLocations.torch = browsers.findPaths(browsers.defaultPaths.torch, browsers.TORCH);
+    return getBrowserHistory(browsers.browserDbLocations.torch, browsers.TORCH, historyTimeLength).then(records => {
+        return records;
     });
 }
 
@@ -405,22 +357,9 @@ async function getBraveHistory(historyTimeLength = 5) {
  * @returns {Promise<array>}
  */
 async function getSafariHistory(historyTimeLength = 5) {
-    let getPaths = [
-        browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI).then(foundPaths => {
-            browsers.browserDbLocations.safari = foundPaths;
-        }),
-    ];
-    Promise.all(getPaths).then(() => {
-        let getRecords = [
-            getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength),
-        ];
-        Promise.all(getRecords).then((records) => {
-            return records;
-        }, error => {
-            throw error;
-        });
-    }, error => {
-        throw error;
+    browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
+    return getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength).then(records => {
+        return records;
     });
 }
 
@@ -430,22 +369,9 @@ async function getSafariHistory(historyTimeLength = 5) {
  * @returns {Promise<array>}
  */
 async function getMaxthonHistory(historyTimeLength = 5) {
-    let getPaths = [
-        browsers.findPaths(browsers.defaultPaths.maxthon, browsers.MAXTHON).then(foundPaths => {
-            browsers.browserDbLocations.maxthon = foundPaths;
-        }),
-    ];
-    Promise.all(getPaths).then(() => {
-        let getRecords = [
-            getBrowserHistory(browsers.browserDbLocations.maxthon, browsers.MAXTHON, historyTimeLength),
-        ];
-        Promise.all(getRecords).then((records) => {
-            return records;
-        }, error => {
-            throw error;
-        });
-    }, error => {
-        throw error;
+    browsers.browserDbLocations.maxthon = browsers.findPaths(browsers.defaultPaths.maxthon, browsers.MAXTHON);
+    return getBrowserHistory(browsers.browserDbLocations.maxthon, browsers.MAXTHON, historyTimeLength).then(records => {
+        return records;
     });
 }
 
@@ -455,22 +381,9 @@ async function getMaxthonHistory(historyTimeLength = 5) {
  * @returns {Promise<array>}
  */
 async function getVivaldiHistory(historyTimeLength = 5) {
-    let getPaths = [
-        browsers.findPaths(browsers.defaultPaths.vivaldi, browsers.VIVALDI).then(foundPaths => {
-            browsers.browserDbLocations.vivaldi = foundPaths;
-        }),
-    ];
-    Promise.all(getPaths).then(() => {
-        let getRecords = [
-            getBrowserHistory(browsers.browserDbLocations.vivaldi, browsers.VIVALDI, historyTimeLength),
-        ];
-        Promise.all(getRecords).then((records) => {
-            return records;
-        }, error => {
-            throw error;
-        });
-    }, error => {
-        throw error;
+    browsers.browserDbLocations.vivaldi = browsers.findPaths(browsers.defaultPaths.vivaldi, browsers.VIVALDI);
+    return getBrowserHistory(browsers.browserDbLocations.vivaldi, browsers.VIVALDI, historyTimeLength).then(records => {
+        return records;
     });
 }
 
@@ -520,6 +433,6 @@ module.exports = {
     getBraveHistory,
     getSafariHistory,
     getMaxthonHistory,
-    getVivaldiHistory
+    getVivaldiHistory,
 };
 
