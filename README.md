@@ -36,6 +36,10 @@ This module will gather browser history from common internet browsers. Given a t
 
 > yarn install node-browser-history
 
+# Notes
+
+* You may experience slow downs when dealing with browser that have a larger browser history.
+
 # How to Use
 
 ```javascript
