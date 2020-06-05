@@ -121,16 +121,6 @@ getBraveHistory(10).then(function (history) {
 
 
 /**
- * Get Safari History
- * @param historyTimeLength time is in minutes
- * @returns {Promise<array>}
- */
-getSafariHistory(10).then(function (history) {
-  console.log(history);
-});
-
-
-/**
  * Get Maxthon History
  * @param historyTimeLength time is in minutes
  * @returns {Promise<array>}
