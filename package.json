@@ -12,8 +12,7 @@
   "build": {
     "extraResources": [],
     "win": {
-      "extraResources": [
-      ]
+      "extraResources": []
     },
     "osx": {
       "extraResources": []
@@ -34,7 +33,6 @@
   },
   "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
   "dependencies": {
-    "moment": "^2.26.0",
     "sqlite-async": "^1.1.0",
     "uuid": "^8.1.0"
   },

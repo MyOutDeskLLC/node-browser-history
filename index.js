@@ -2,7 +2,6 @@ const path = require("path");
 const fs = require("fs");
 const Database = require("sqlite-async");
 const uuidV4 = require("uuid").v4;
-const moment = require("moment");
 
 const browsers = require("./browsers");
 
@@ -34,14 +33,6 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
 
         case browsers.SAFARI:
             return await getSafariBasedBrowserRecords(paths, browserName, historyTimeLength);
-
-        case browsers.INTERNETEXPLORER:
-            //Only do this on Windows we have to do t his here because the DLL manages this
-            if (process.platform !== "win32") {
-                return [];
-            }
-            return await getInternetExplorerBasedBrowserRecords(historyTimeLength);
-
         default:
             return [];
     }
@@ -117,7 +108,7 @@ async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLeng
         newDbPaths.push(tmpFilePaths.db);
         let sql = `SELECT title, datetime(last_visit_date/1000000,'unixepoch') last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
         await forceWalFileDump(paths[i], tmpFilePaths.db);
-        browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName, true));
+        browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName));
     }
     deleteTempFiles(newDbPaths);
     return browserHistory;
@@ -135,21 +126,18 @@ async function getSafariBasedBrowserRecords(paths, browserName, historyTimeLengt
         newDbPaths.push(tmpFilePaths.db);
         let sql = `SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} + " minutes')`;
         await forceWalFileDump(paths[i], tmpFilePaths.db);
-        browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName, true));
+        browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName));
     }
     deleteTempFiles(newDbPaths);
     return browserHistory;
 }
 
-
 async function getMaxthonBasedBrowserRecords(paths, browserName, historyTimeLength) {
-    let newDbPaths = [];
     let browserHistory = [];
     for (let i = 0; i < paths.length; i++) {
         let sql = `SELECT zlastvisittime last_visit_time, zhost host, ztitle title, zurl url FROM zmxhistoryentry WHERE  Datetime (zlastvisittime + 978307200, 'unixepoch') >= Datetime('now', '-${historyTimeLength} minutes')`;
-        browserHistory.push(await getHistoryFromDb(paths[i], sql, browserName, true));
+        browserHistory.push(await getHistoryFromDb(paths[i], sql, browserName));
     }
-    deleteTempFiles(newDbPaths);
     return browserHistory;
 }
 
@@ -260,6 +248,7 @@ async function getVivaldiHistory(historyTimeLength = 5) {
         return records;
     });
 }
+
 /**
  * Get Microsoft Edge History
  * @param historyTimeLength time is in minutes
@@ -287,7 +276,7 @@ async function getAllHistory(historyTimeLength = 5) {
     browsers.browserDbLocations.opera = browsers.findPaths(browsers.defaultPaths.opera, browsers.OPERA);
     browsers.browserDbLocations.torch = browsers.findPaths(browsers.defaultPaths.torch, browsers.TORCH);
     browsers.browserDbLocations.brave = browsers.findPaths(browsers.defaultPaths.brave, browsers.BRAVE);
-    // browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
+    browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
     browsers.browserDbLocations.seamonkey = browsers.findPaths(browsers.defaultPaths.seamonkey, browsers.SEAMONKEY);
     browsers.browserDbLocations.maxthon = browsers.findPaths(browsers.defaultPaths.maxthon, browsers.MAXTHON);
     browsers.browserDbLocations.vivaldi = browsers.findPaths(browsers.defaultPaths.vivaldi, browsers.VIVALDI);
@@ -299,7 +288,7 @@ async function getAllHistory(historyTimeLength = 5) {
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.opera, browsers.OPERA, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.torch, browsers.TORCH, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.brave, browsers.BRAVE, historyTimeLength));
-    // allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength));
+    allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.vivaldi, browsers.VIVALDI, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.maxthon, browsers.MAXTHON, historyTimeLength));

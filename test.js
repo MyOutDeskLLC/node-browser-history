@@ -17,7 +17,7 @@ function testGetAllHistory() {
 function testGetChromeOnly() {
     console.log("***** RUNNING GET CHROME ONLY *****");
     return new Promise(res => {
-        history.getChromeHistory(300).then(history => {
+        history.getChromeHistory(180).then(history => {
             console.log("PASS GET CHROME ONLY");
             console.log(history);
             res(history);
@@ -31,7 +31,7 @@ function testGetChromeOnly() {
 function testFireFoxOnly() {
     console.log("***** RUNNING GET FIREFOX ONLY *****");
     return new Promise(res => {
-        history.getFirefoxHistory(300).then(history => {
+        history.getFirefoxHistory(180).then(history => {
             console.log("PASS GET FIREFOX ONLY");
             console.log(history);
             res(history);
@@ -147,7 +147,7 @@ function testTorchOnly() {
 function testBraveOnly() {
     console.log("***** RUNNING GET BRAVE ONLY *****");
     return new Promise(res => {
-        history.getBraveHistory(300).then(history => {
+        history.getBraveHistory(180).then(history => {
             console.log("PASS GET BRAVE ONLY");
             console.log(history);
             res(history);
@@ -161,7 +161,7 @@ function testBraveOnly() {
 function testMicrosoftEdgeOnly() {
     console.log("***** RUNNING GET MICROSOFT EDGE ONLY *****");
     return new Promise(res => {
-        history.getMicrosoftEdge(300).then(history => {
+        history.getMicrosoftEdge(180).then(history => {
             console.log("PASS GET MICROSOFT EDGE ONLY");
             console.log(history);
             res(history);
@@ -181,7 +181,6 @@ let tests = [
     // testSeaMonkeyOnly(),
     // testMaxthonOnly(),
     // testVivaldiOnly(),
-
     // testMicrosoftEdgeOnly(),
     // testSafariOnly(),
     // testTorchOnly(),

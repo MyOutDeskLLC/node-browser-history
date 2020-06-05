@@ -3,7 +3,7 @@
 This module will gather browser history from common internet browsers. Given a time frame.
 > Operating Systems Supported
 
-* Windows (Partially Complete)
+* Windows
 * Mac
 
 > Browsers Supported
@@ -12,7 +12,6 @@ This module will gather browser history from common internet browsers. Given a t
 ![Maxthon](https://i.imgur.com/D2rD9CV.png)
 ![FireFox](https://i.imgur.com/Xy4ZZTT.png)
 ![Opera](https://i.imgur.com/VVYCBQW.png)
-![Safari](https://i.imgur.com/AZYxynY.png)
 ![SeaMonkey](https://i.imgur.com/OgTBYE8.png)
 ![Torch](https://i.imgur.com/9xB5ReO.png)
 ![Vivaldi](https://i.imgur.com/GTy9hXK.png)
@@ -24,7 +23,6 @@ This module will gather browser history from common internet browsers. Given a t
 * Microsoft Edge
 * Mozilla Firefox
 * Opera
-* Safari (Mac Only)
 * Seamonkey
 * Torch (Windows Only)
 * Vivaldi (Mac Only)

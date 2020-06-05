@@ -45,18 +45,18 @@ if (process.platform !== "darwin") {
     defaultPaths.chrome = path.join(basePath, "Local", "Google", "Chrome");
     defaultPaths.firefox = path.join(basePath, "Roaming", "Mozilla", "Firefox");
     defaultPaths.opera = path.join(basePath, "Roaming", "Opera Software");
-    defaultPaths.ie = path.join(basePath, "Local", "Microsoft", "Windows", "History", "History.IE5");
-    // defaultPaths.edge = path.join(basePath, "Local", "Packages");
+    defaultPaths.edge = path.join(basePath, "Local", "Microsoft", "Edge");
     defaultPaths.torch = path.join(basePath, "Local", "Torch", "User Data");
     defaultPaths.seamonkey = path.join(basePath, "Roaming", "Mozilla", "SeaMonkey");
-    defaultPaths.brave = path.join(basePath, "Local", "BraveSoftware", "Brave-Browser", "User Data");
+    defaultPaths.brave = path.join(basePath, "Local", "BraveSoftware");
+
 } else {
     let homeDirectory = process.env.HOME;
 
     defaultPaths.chrome = path.join(homeDirectory, "Library", "Application Support", "Google", "Chrome");
     defaultPaths.firefox = path.join(homeDirectory, "Library", "Application Support", "Firefox");
     defaultPaths.edge = path.join(homeDirectory, "Library", "Application Support", "Microsoft Edge");
-    defaultPaths.safari = path.join(homeDirectory, "Library", "Safari");
+    // defaultPaths.safari = path.join(homeDirectory, "Library", "Safari");
     defaultPaths.opera = path.join(homeDirectory, "Library", "Application Support", "com.operasoftware.Opera");
     defaultPaths.maxthon = path.join(homeDirectory, "Library", "Application Support", "com.maxthon.mac.Maxthon");
     defaultPaths.vivaldi = path.join(homeDirectory, "Library", "Application Support", "Vivaldi");
