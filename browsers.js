@@ -1,5 +1,6 @@
 const path = require("path");
-const fs = require("fs");
+const fsp = require("fs").promises;
+const util = require("util");
 
 const CHROME = "Google Chrome",
     FIREFOX = "Mozilla Firefox",
@@ -48,7 +49,7 @@ if (process.platform !== "darwin") {
     defaultPaths.edge = path.join(basePath, "Local", "Microsoft", "Edge");
     defaultPaths.torch = path.join(basePath, "Local", "Torch", "User Data");
     defaultPaths.seamonkey = path.join(basePath, "Roaming", "Mozilla", "SeaMonkey");
-    defaultPaths.brave = path.join(basePath, "Local", "BraveSoftware");
+    defaultPaths.brave = path.join(basePath, "Local", "BraveSoftware", "Brave-Browser", "Default");
 
 } else {
     let homeDirectory = process.env.HOME;
@@ -70,28 +71,25 @@ if (process.platform !== "darwin") {
  * @param  {String} startPath    Path relative to this file or other file which requires this files
  * @param  {String} filter       Extension name, e.g: '.html'
  * @param regExp
- * @return {Array}               Result files with path string in an array
  */
-function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
+async function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
     let results = [];
-    if (!fs.existsSync(startPath)) {
-        //console.log("no dir ", startPath);
-        return results;
-    }
-
-    let files = fs.readdirSync(startPath);
+    let files = await fsp.readdir(startPath);
     for (let i = 0; i < files.length; i++) {
         let filename = path.join(startPath, files[i]);
-        if (!fs.existsSync(filename)) {
-            // console.log('file doesn\'t exist ', startPath);
-            return results;
-        }
-        let stat = fs.lstatSync(filename);
-        if (stat.isDirectory()) {
-            results = results.concat(findFilesInDir(filename, filter, regExp)); //recurse
-        } else if (filename.indexOf(filter) >= 0 && regExp.test(filename)) {
-            // console.log('-- found: ', filename);
-            results.push(filename);
+        try {
+            let stats = await fsp.stat(filename);
+            if (stats.isDirectory()) {
+                try {
+                    results = results.concat((await findFilesInDir(filename, filter, regExp)));
+                } catch (error) {
+                    console.log(error);
+                }
+            } else if (filename.indexOf(filter) >= 0 && regExp.test(filename)) {
+                console.log("-- found: ", filename);
+                results.push(filename);
+            }
+        } catch (error) {
         }
     }
     return results;
@@ -102,9 +100,9 @@ function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
  * Returns an array of strings, paths, or an empty array
  * @param path
  * @param browserName
- * @returns {Array}
+ * @returns {Promise}
  */
-function findPaths(path, browserName) {
+async function findPaths(path, browserName) {
     switch (browserName) {
         case FIREFOX:
         case SEAMONKEY:
@@ -121,7 +119,7 @@ function findPaths(path, browserName) {
         case MAXTHON:
             return findFilesInDir(path, ".dat", /History\.dat$/);
         default:
-            return [];
+            return Promise.resolve([]);
     }
 }
 
@@ -138,6 +136,6 @@ module.exports = {
     SAFARI,
     MAXTHON,
     BRAVE,
-    EDGE
+    EDGE,
 };
 
