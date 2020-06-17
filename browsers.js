@@ -70,9 +70,13 @@ if (process.platform !== "darwin") {
  * @param  {String} startPath    Path relative to this file or other file which requires this files
  * @param  {String} filter       Extension name, e.g: '.html'
  * @param regExp
+ * @param depth
  * @return {Array}               Result files with path string in an array
  */
-function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
+function findFilesInDir(startPath, filter, regExp = new RegExp(".*"), depth = 0) {
+    if(depth === 4){
+        return [];
+    }
     let results = [];
     if (!fs.existsSync(startPath)) {
         //console.log("no dir ", startPath);
@@ -88,7 +92,7 @@ function findFilesInDir(startPath, filter, regExp = new RegExp(".*")) {
         }
         let stat = fs.lstatSync(filename);
         if (stat.isDirectory()) {
-            results = results.concat(findFilesInDir(filename, filter, regExp)); //recurse
+            results = results.concat(findFilesInDir(filename, filter, regExp, depth + 1)); //recurse
         } else if (filename.indexOf(filter) >= 0 && regExp.test(filename)) {
             // console.log('-- found: ', filename);
             results.push(filename);
