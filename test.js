@@ -7,9 +7,9 @@ function testGetAllHistory() {
             console.log("PASS GET ALL HISTORY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAILED TO GET ALL HISTORY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -21,9 +21,9 @@ function testGetChromeOnly() {
             console.log("PASS GET CHROME ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET CHROME ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -35,9 +35,9 @@ function testFireFoxOnly() {
             console.log("PASS GET FIREFOX ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET FIREFOX ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -49,9 +49,9 @@ function testSafariOnly() {
             console.log("PASS GET SAFARI ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET SAFARI ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -63,9 +63,9 @@ function testOperaOnly() {
             console.log("PASS GET OPERA ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET OPERA ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -77,9 +77,9 @@ function testSeaMonkeyOnly() {
             console.log("PASS GET SEAMONKEY ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET SEAMONKEY ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -91,9 +91,9 @@ function testVivaldiOnly() {
             console.log("PASS GET VIVALDI ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET VIVALDI ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -105,9 +105,9 @@ function testMaxthonOnly() {
             console.log("PASS GET MAXTHON ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET MAXTHON ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -123,9 +123,9 @@ function testInternetExplorerOnly() {
             console.log("PASS GET INTERNET EXPLORER ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET INTERNET EXPLORER ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -137,9 +137,9 @@ function testTorchOnly() {
             console.log("PASS GET TORCH ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET TORCH ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -151,9 +151,9 @@ function testBraveOnly() {
             console.log("PASS GET BRAVE ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET BRAVE ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -165,9 +165,9 @@ function testMicrosoftEdgeOnly() {
             console.log("PASS GET MICROSOFT EDGE ONLY");
             console.log(history);
             res(history);
-        }, error => {
+        }).catch(error => {
             console.log("***** FAIL TO GET MICROSOFT EDGE ONLY *****");
-            throw (error);
+            return Promise.reject(error);
         });
     });
 }
@@ -190,7 +190,9 @@ let tests = [
 Promise.all(tests).then(() => {
     console.log("PASSING ALL TESTS");
     process.exit(0);
-}, error => {
+}).catch(error => {
+    console.log('kasjdlasdjlaskdjalskdj')
+    console.log(error)
     process.exit(error);
 });
 

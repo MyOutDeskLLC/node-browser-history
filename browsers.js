@@ -119,7 +119,7 @@ function findPaths(path, browserName) {
         case BRAVE:
         case VIVALDI:
         case EDGE:
-            return findFilesInDir(path, "History", /History$/);
+            return findFilesInDir(path, "History", /\/History$/);
         case SAFARI:
             return findFilesInDir(path, ".db", /History\.db$/);
         case MAXTHON:
