@@ -174,7 +174,7 @@ function testMicrosoftEdgeOnly() {
 
 
 let tests = [
-    // testGetChromeOnly(),
+    testGetChromeOnly(),
     // testFireFoxOnly(),
     // testBraveOnly(),
     // testOperaOnly(),
@@ -184,7 +184,7 @@ let tests = [
     // testMicrosoftEdgeOnly(),
     // testSafariOnly(),
     // testTorchOnly(),
-    testGetAllHistory(),
+    // testGetAllHistory(),
 ];
 
 Promise.all(tests).then(() => {
