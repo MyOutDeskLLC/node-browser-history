@@ -1,6 +1,6 @@
 {
   "name": "node-browser-history",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "This application aims to retrieve browser history from all browsers on the user's computer. It will attempt to read from some common locations.",
   "main": "index.js",
   "scripts": {
@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
   "dependencies": {
-    "sqlite-async": "git+https://github.com/tance77/sqlite-async.git",
+    "sqlite-async": "^1.1.1",
     "uuid": "^8.1.0"
   },
   "devDependencies": {}
