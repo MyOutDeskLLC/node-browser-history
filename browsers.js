@@ -10,7 +10,8 @@ const CHROME = "Google Chrome",
     SAFARI = "Safari",
     MAXTHON = "Maxthon",
     EDGE = "Microsoft Edge",
-    BRAVE = "Brave";
+    BRAVE = "Brave",
+    AVAST = "AVAST Browser";
 
 let browserDbLocations = {
     chrome: "",
@@ -23,6 +24,7 @@ let browserDbLocations = {
     maxthon: "",
     safari: "",
     brave: "",
+    avast: ""
 };
 
 let defaultPaths = {
@@ -36,6 +38,7 @@ let defaultPaths = {
     maxthon: "",
     safari: "",
     brave: "",
+    avast: ""
 };
 
 if (process.platform !== "darwin") {
@@ -43,6 +46,7 @@ if (process.platform !== "darwin") {
     let basePath = Path.join(process.env.HOMEDRIVE, "Users", process.env.USERNAME, "AppData");
 
     defaultPaths.chrome = Path.join(basePath, "Local", "Google", "Chrome");
+    defaultPaths.avast = Path.join(basePath, "Local", "Google", "AVAST Software");
     defaultPaths.firefox = Path.join(basePath, "Roaming", "Mozilla", "Firefox");
     defaultPaths.opera = Path.join(basePath, "Roaming", "Opera Software");
     defaultPaths.edge = Path.join(basePath, "Local", "Microsoft", "Edge");
@@ -54,6 +58,7 @@ if (process.platform !== "darwin") {
     let homeDirectory = process.env.HOME;
 
     defaultPaths.chrome = Path.join(homeDirectory, "Library", "Application Support", "Google", "Chrome");
+    defaultPaths.avast = Path.join(homeDirectory, "Library", "Application Support", "AVAST Software", "Browser");
     defaultPaths.firefox = Path.join(homeDirectory, "Library", "Application Support", "Firefox");
     defaultPaths.edge = Path.join(homeDirectory, "Library", "Application Support", "Microsoft Edge");
     // defaultPaths.safari = Path.join(homeDirectory, "Library", "Safari");
@@ -117,7 +122,6 @@ function findFilesInDir(startPath, filter, targetFile, depth = 0) {
  * @returns {Array}
  */
 function findPaths(path, browserName) {
-
     switch (browserName) {
         case FIREFOX:
         case SEAMONKEY:
@@ -129,6 +133,7 @@ function findPaths(path, browserName) {
         case BRAVE:
         case VIVALDI:
         case EDGE:
+        case AVAST:
             return findFilesInDir(path, "History", Path.sep + 'History');
         case SAFARI:
             return findFilesInDir(path, ".db", Path.sep + 'History.db');
@@ -152,6 +157,7 @@ module.exports = {
     SAFARI,
     MAXTHON,
     BRAVE,
-    EDGE
+    EDGE,
+    AVAST
 };
 

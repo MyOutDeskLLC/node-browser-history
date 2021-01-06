@@ -17,6 +17,7 @@ This module will gather browser history from common internet browsers. Given a t
 ![Vivaldi](https://i.imgur.com/GTy9hXK.png)
 ![Brave](https://i.imgur.com/SEWgLIJ.png)
 ![Microsoft Edge](https://i.imgur.com/Iyd33UT.png)
+![Avast Browser](https://i.imgur.com/gIY5cjx.png)
 
 * Google Chrome
 * Maxthon (Mac Only)

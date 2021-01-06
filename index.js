@@ -26,6 +26,7 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
         case browsers.VIVALDI:
         case browsers.BRAVE:
         case browsers.EDGE:
+        case browsers.AVAST:
             return await getChromeBasedBrowserRecords(paths, browserName, historyTimeLength);
 
         case browsers.MAXTHON:
@@ -250,6 +251,18 @@ async function getVivaldiHistory(historyTimeLength = 5) {
 }
 
 /**
+ * Get AVAST Browser History
+ * @param historyTimeLength
+ * @return {Promise<Array>}
+ */
+async function getAvastHistory(historyTimeLength = 5) {
+    browsers.browserDbLocations.avast = browsers.findPaths(browsers.defaultPaths.avast, browsers.AVAST);
+    return getBrowserHistory(browsers.browserDbLocations.avast, browsers.AVAST, historyTimeLength).then(records => {
+        return records;
+    });
+}
+
+/**
  * Get Microsoft Edge History
  * @param historyTimeLength time is in minutes
  * @returns {Promise<array>}
@@ -281,6 +294,7 @@ async function getAllHistory(historyTimeLength = 5) {
     browsers.browserDbLocations.maxthon = browsers.findPaths(browsers.defaultPaths.maxthon, browsers.MAXTHON);
     browsers.browserDbLocations.vivaldi = browsers.findPaths(browsers.defaultPaths.vivaldi, browsers.VIVALDI);
     browsers.browserDbLocations.edge = browsers.findPaths(browsers.defaultPaths.edge, browsers.EDGE);
+    browsers.browserDbLocations.avast = browsers.findPaths(browsers.defaultPaths.avast, browsers.AVAST);
 
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.firefox, browsers.FIREFOX, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength));
@@ -293,6 +307,7 @@ async function getAllHistory(historyTimeLength = 5) {
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.maxthon, browsers.MAXTHON, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.edge, browsers.EDGE, historyTimeLength));
+    allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.avast, browsers.EDGE, historyTimeLength));
     //No Path because this is handled by the dll
 
     return allBrowserRecords;
@@ -310,5 +325,6 @@ module.exports = {
     getMaxthonHistory,
     getVivaldiHistory,
     getMicrosoftEdge,
+    getAvastHistory
 };
 

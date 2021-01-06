@@ -56,6 +56,20 @@ function testSafariOnly() {
     });
 }
 
+function testAvastOnly() {
+    console.log("***** RUNNING GET AVAST ONLY *****");
+    return new Promise(res => {
+        history.getAvastHistory(180).then(history => {
+            console.log(history);
+            console.log("PASS AVAST ONLY");
+            res(history);
+        }).catch(error => {
+            console.log("***** FAIL TO GET AVAST ONLY *****");
+            return Promise.reject(error);
+        });
+    });
+}
+
 function testOperaOnly() {
     console.log("***** RUNNING GET OPERA ONLY *****");
     return new Promise(res => {
@@ -174,17 +188,18 @@ function testMicrosoftEdgeOnly() {
 
 
 let tests = [
-    testGetChromeOnly(),
-    testFireFoxOnly(),
-    testBraveOnly(),
-    testOperaOnly(),
-    testSeaMonkeyOnly(),
-    testMaxthonOnly(),
-    testVivaldiOnly(),
-    testMicrosoftEdgeOnly(),
-    testSafariOnly(),
-    testTorchOnly(),
-    testGetAllHistory(),
+    // testGetChromeOnly(),
+    // testFireFoxOnly(),
+    // testBraveOnly(),
+    // testOperaOnly(),
+    // testSeaMonkeyOnly(),
+    // testMaxthonOnly(),
+    // testVivaldiOnly(),
+    testAvastOnly()
+    // testMicrosoftEdgeOnly(),
+    // testSafariOnly(),
+    // testTorchOnly(),
+    // testGetAllHistory(),
 ];
 
 Promise.all(tests).then(() => {
