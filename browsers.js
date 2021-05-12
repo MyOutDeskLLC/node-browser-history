@@ -98,7 +98,7 @@ function findFilesInDir(startPath, filter, targetFile, depth = 0) {
         if (stat.isDirectory()) {
             results = results.concat(findFilesInDir(filename, filter, targetFile, depth + 1)); //recurse
         } else if(filename.endsWith(targetFile) === true) {
-            console.log('-- found: ', filename);
+            // console.log('-- found: ', filename);
             results.push(filename);
         }
         /*
