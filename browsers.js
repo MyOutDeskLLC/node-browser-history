@@ -1,5 +1,6 @@
 const Path =  require('path')
 const fs = require("fs");
+const { setupDefaultPaths: setupPaths } = require('./history_paths');
 
 const CHROME = "Google Chrome",
     FIREFOX = "Mozilla Firefox",
@@ -41,33 +42,7 @@ let defaultPaths = {
     avast: ""
 };
 
-if (process.platform !== "darwin") {
-
-    let basePath = Path.join(process.env.HOMEDRIVE, "Users", process.env.USERNAME, "AppData");
-
-    defaultPaths.chrome = Path.join(basePath, "Local", "Google", "Chrome");
-    defaultPaths.avast = Path.join(basePath, "Local", "Google", "AVAST Software");
-    defaultPaths.firefox = Path.join(basePath, "Roaming", "Mozilla", "Firefox");
-    defaultPaths.opera = Path.join(basePath, "Roaming", "Opera Software");
-    defaultPaths.edge = Path.join(basePath, "Local", "Microsoft", "Edge");
-    defaultPaths.torch = Path.join(basePath, "Local", "Torch", "User Data");
-    defaultPaths.seamonkey = Path.join(basePath, "Roaming", "Mozilla", "SeaMonkey");
-    defaultPaths.brave = Path.join(basePath, "Local", "BraveSoftware");
-
-} else {
-    let homeDirectory = process.env.HOME;
-
-    defaultPaths.chrome = Path.join(homeDirectory, "Library", "Application Support", "Google", "Chrome");
-    defaultPaths.avast = Path.join(homeDirectory, "Library", "Application Support", "AVAST Software", "Browser");
-    defaultPaths.firefox = Path.join(homeDirectory, "Library", "Application Support", "Firefox");
-    defaultPaths.edge = Path.join(homeDirectory, "Library", "Application Support", "Microsoft Edge");
-    // defaultPaths.safari = Path.join(homeDirectory, "Library", "Safari");
-    defaultPaths.opera = Path.join(homeDirectory, "Library", "Application Support", "com.operasoftware.Opera");
-    defaultPaths.maxthon = Path.join(homeDirectory, "Library", "Application Support", "com.maxthon.mac.Maxthon");
-    defaultPaths.vivaldi = Path.join(homeDirectory, "Library", "Application Support", "Vivaldi");
-    defaultPaths.seamonkey = Path.join(homeDirectory, "Library", "Application Support", "SeaMonkey", "Profiles");
-    defaultPaths.brave = Path.join(homeDirectory, "Library", "Application Support", "BraveSoftware", "Brave-Browser");
-}
+setupPaths(defaultPaths);
 
 /**
  * Find all files recursively in specific folder with specific extension, e.g:
@@ -92,7 +67,7 @@ function findFilesInDir(startPath, filter, targetFile, depth = 0) {
         let filename = Path.join(startPath, files[i]);
         if (!fs.existsSync(filename)) {
             // console.log('file doesn\'t exist ', startPath);
-            return results;
+            continue;
         }
         let stat = fs.lstatSync(filename);
         if (stat.isDirectory()) {
@@ -125,7 +100,6 @@ function findPaths(path, browserName) {
     switch (browserName) {
         case FIREFOX:
         case SEAMONKEY:
-
             return findFilesInDir(path, ".sqlite", Path.sep + 'places.sqlite');
         case CHROME:
         case TORCH:

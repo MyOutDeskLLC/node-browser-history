@@ -1,16 +1,18 @@
 # node-browser-history
 
 This module will gather browser history from common internet browsers. Given a time frame.
-> Operating Systems Supported
+
+## Supported operating systems
 
 * Windows
 * Mac
+* Linux (only Firefox and Chrome)
 
-> Browsers Supported
+## Supported browsers
 
 ![Chrome](https://i.imgur.com/SgiX8bb.png)
 ![Maxthon](https://i.imgur.com/D2rD9CV.png)
-![FireFox](https://i.imgur.com/Xy4ZZTT.png)
+![Firefox](https://i.imgur.com/Xy4ZZTT.png)
 ![Opera](https://i.imgur.com/VVYCBQW.png)
 ![SeaMonkey](https://i.imgur.com/OgTBYE8.png)
 ![Torch](https://i.imgur.com/9xB5ReO.png)
@@ -19,15 +21,19 @@ This module will gather browser history from common internet browsers. Given a t
 ![Microsoft Edge](https://i.imgur.com/Iyd33UT.png)
 ![Avast Browser](https://i.imgur.com/gIY5cjx.png)
 
-* Google Chrome
-* Maxthon (Mac Only)
-* Microsoft Edge
-* Mozilla Firefox
-* Opera
-* Seamonkey
-* Torch (Windows Only)
-* Vivaldi (Mac Only)
-* Brave
+| Browser         | Windows | Mac | Linux |
+| --------------- | ------- | --- | ----- |
+| Google Chrome   | ✅      | ✅  | ✅    |
+| Maxthon         | -       | ✅  | -     |
+| Microsoft Edge  | ✅      | ✅  | -     |
+| Mozilla Firefox | ✅      | ✅  | ✅    |
+| Opera           | ✅      | ✅  | -     |
+| Seamonkey       | ✅      | ✅  | -     |
+| Torch           | ✅      | -   | -     |
+| Vivaldi         | -       | ✅  | -     |
+| Brave           | ✅      | ✅  | -     |
+| Avast Browser   | ✅      | ✅  | -     |
+
 
 # How to Install
 
