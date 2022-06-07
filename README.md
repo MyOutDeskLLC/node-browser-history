@@ -10,17 +10,6 @@ This module will gather browser history from common internet browsers. Given a t
 
 ## Supported browsers
 
-![Chrome](https://i.imgur.com/SgiX8bb.png)
-![Maxthon](https://i.imgur.com/D2rD9CV.png)
-![Firefox](https://i.imgur.com/Xy4ZZTT.png)
-![Opera](https://i.imgur.com/VVYCBQW.png)
-![SeaMonkey](https://i.imgur.com/OgTBYE8.png)
-![Torch](https://i.imgur.com/9xB5ReO.png)
-![Vivaldi](https://i.imgur.com/GTy9hXK.png)
-![Brave](https://i.imgur.com/SEWgLIJ.png)
-![Microsoft Edge](https://i.imgur.com/Iyd33UT.png)
-![Avast Browser](https://i.imgur.com/gIY5cjx.png)
-
 | Browser         | Windows | Mac | Linux |
 | --------------- | ------- | --- | ----- |
 | Google Chrome   | ✅      | ✅  | ✅    |
