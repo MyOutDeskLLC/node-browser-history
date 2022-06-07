@@ -112,6 +112,7 @@ async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLeng
     let browserHistory = [];
     for (let i = 0; i < paths.length; i++) {
         const tmpFilePaths = copyDbAndWalFile(paths[i]);
+        console.log(tmpFilePaths)
         newDbPaths.push(tmpFilePaths.db);
         let sql = `SELECT title, datetime(last_visit_date/1000000,'unixepoch') last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes')  group by title, last_visit_time order by last_visit_time`;
         await forceWalFileDump(tmpFilePaths.db);
@@ -215,6 +216,7 @@ async function getTorchHistory(historyTimeLength = 5) {
  */
 async function getBraveHistory(historyTimeLength = 5) {
     browsers.browserDbLocations.brave = browsers.findPaths(browsers.defaultPaths.brave, browsers.BRAVE);
+    console.log(browsers.browserDbLocations.brave)
     return getBrowserHistory(browsers.browserDbLocations.brave, browsers.BRAVE, historyTimeLength).then(records => {
         return records;
     });
