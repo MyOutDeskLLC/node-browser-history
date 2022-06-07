@@ -47,8 +47,8 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
     }
 }
 
-async function getHistoryFromDb(newDbPath, sql, browserName) {
-    const db = await Database.open(newDbPath);
+async function getHistoryFromDb(dbPath, sql, browserName) {
+    const db = await Database.open(dbPath);
     const rows = await db.all(sql);
     let browserHistory = rows.map(row => {
         return {
@@ -72,14 +72,12 @@ function copyDbAndWalFile(dbPath, fileExtension = 'sqlite') {
     return filePaths;
 }
 
-async function forceWalFileDump(dbPath, newDbPath) {
-    const db = await Database.open(newDbPath);
+async function forceWalFileDump(tmpDbPath) {
+    const db = await Database.open(tmpDbPath);
 
     // If the browser uses a wal file we need to create a wal file with the same filename as our temp database.
-    // Call wal checkpoint on it so it dumps to the original database. Finally re-copy the original database into the same temporary database. This will have the good data.
     await db.run("PRAGMA wal_checkpoint(FULL)");
     await db.close();
-    fs.copyFileSync(dbPath, newDbPath);
 }
 
 function deleteTempFiles(paths) {
@@ -115,8 +113,8 @@ async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLeng
     for (let i = 0; i < paths.length; i++) {
         const tmpFilePaths = copyDbAndWalFile(paths[i]);
         newDbPaths.push(tmpFilePaths.db);
-        let sql = `SELECT title, datetime(last_visit_date/1000000,'unixepoch') last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
-        await forceWalFileDump(paths[i], tmpFilePaths.db);
+        let sql = `SELECT title, datetime(last_visit_date/1000000,'unixepoch') last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes')  group by title, last_visit_time order by last_visit_time`;
+        await forceWalFileDump(tmpFilePaths.db);
         browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName));
     }
     deleteTempFiles(newDbPaths);
@@ -133,8 +131,8 @@ async function getSafariBasedBrowserRecords(paths, browserName, historyTimeLengt
     for (let i = 0; i < paths.length; i++) {
         const tmpFilePaths = copyDbAndWalFile(paths[i]);
         newDbPaths.push(tmpFilePaths.db);
-        let sql = `SELECT i.id, i.url, v.title, v.visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} + " minutes')`;
-        await forceWalFileDump(paths[i], tmpFilePaths.db);
+        let sql = `SELECT i.id, i.url, v.title, v.visit_time as last_visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes')`;
+        await forceWalFileDump(tmpFilePaths.db);
         browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName));
     }
     deleteTempFiles(newDbPaths);
@@ -229,7 +227,9 @@ async function getBraveHistory(historyTimeLength = 5) {
  */
 async function getSafariHistory(historyTimeLength = 5) {
     browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
+    console.log(browsers.browserDbLocations.safari);
     return getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength).then(records => {
+        console.log(records)
         return records;
     });
 }

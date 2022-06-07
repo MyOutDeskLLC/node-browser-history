@@ -28,21 +28,8 @@ let browserDbLocations = {
     avast: ""
 };
 
-let defaultPaths = {
-    chrome: "",
-    firefox: "",
-    opera: "",
-    edge: "",
-    torch: "",
-    seamonkey: "",
-    vivaldi: "",
-    maxthon: "",
-    safari: "",
-    brave: "",
-    avast: ""
-};
 
-setupPaths(defaultPaths);
+let defaultPaths = setupPaths();
 
 /**
  * Find all files recursively in specific folder with specific extension, e.g:

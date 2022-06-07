@@ -3,7 +3,13 @@ let history = require("./index");
 function testGetAllHistory() {
     console.log("***** RUNNING GET ALL HISTORY TEST *****");
     return new Promise(res => {
-        history.getAllHistory(10).then(history => {
+        history.getAllHistory(60).then(browsers => {
+            history = []
+            for(let browser of browsers){
+                for(let record of browser){
+                    history.push(record)
+                }
+            }
             console.log("PASS GET ALL HISTORY");
             console.log(history);
             res(history);
@@ -195,11 +201,11 @@ let tests = [
     // testSeaMonkeyOnly(),
     // testMaxthonOnly(),
     // testVivaldiOnly(),
-    testAvastOnly()
+    // testAvastOnly(),
     // testMicrosoftEdgeOnly(),
     // testSafariOnly(),
     // testTorchOnly(),
-    // testGetAllHistory(),
+    testGetAllHistory(),
 ];
 
 Promise.all(tests).then(() => {
