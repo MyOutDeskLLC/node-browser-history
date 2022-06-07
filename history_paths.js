@@ -15,6 +15,7 @@ function setupForWindows() {
     defaultPaths.torch = Path.join(appDataDirectory, "Local", "Torch", "User Data");
     defaultPaths.seamonkey = Path.join(appDataDirectory, "Roaming", "Mozilla", "SeaMonkey");
     defaultPaths.brave = Path.join(appDataDirectory, "Local", "BraveSoftware", "Brave-Browser", "User Data");
+    defaultPaths.vivaldi = Path.join(appDataDirectory, "Local", "Vivaldi", "User Data");
     return defaultPaths
 }
 
