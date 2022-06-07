@@ -11,17 +11,17 @@ This module will gather browser history from common internet browsers. Given a t
 ## Supported browsers
 
 | Browser         | Windows | Mac | Linux |
-| --------------- | ---- | --- | ----- |
-| Google Chrome   | ✅    | ✅  | ✅    |
-| Maxthon         | -    | ✅  | -     |
-| Microsoft Edge  | ✅    | ✅  | -     |
-| Mozilla Firefox | ✅    | ✅  | ✅    |
-| Opera           | ✅    | ✅  | -     |
-| Seamonkey       | ✅    | ✅  | -     |
-| Torch           | ✅    | -   | -     |
-| Vivaldi         | ✅      | ✅  | -     |
-| Brave           | ✅    | ✅  | -     |
-| Avast Browser   | ✅    | ✅  | -     |
+| --------------- | -- | --- | ----- |
+| Google Chrome   | ✅  | ✅  | ✅    |
+| Maxthon         | ❌   | ✅  | ❌     |
+| Microsoft Edge  | ✅  | ✅  | ❌     |
+| Mozilla Firefox | ✅  | ✅  | ✅    |
+| Opera           | ✅  | ✅  | ❌     |
+| Seamonkey       | ✅  | ✅  | ❌     |
+| Torch           | ✅  | ❌   | ❌     |
+| Vivaldi         | ✅    | ✅  | ❌     |
+| Brave           | ✅  | ✅  | ❌     |
+| Avast Browser   | ✅  | ✅  | ❌     |
 
 
 # How to Install
@@ -134,13 +134,4 @@ getVivaldiHistory(10).then(function (history) {
   console.log(history);
 });
 
-
-/**
- * Get Internet Explorer History
- * @param historyTimeLength time is in minutes
- * @returns {Promise<array>}
- */
-getIEHistory(10).then(function (history) {
-  console.log(history);
-});
 ```
