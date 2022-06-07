@@ -11,17 +11,17 @@ This module will gather browser history from common internet browsers. Given a t
 ## Supported browsers
 
 | Browser         | Windows | Mac | Linux |
-| --------------- | -- | --- | ----- |
-| Google Chrome   | ✅  | ✅  | ✅    |
-| Maxthon         | ❌   | ✅  | ❌     |
-| Microsoft Edge  | ✅  | ✅  | ❌     |
-| Mozilla Firefox | ✅  | ✅  | ✅    |
-| Opera           | ✅  | ✅  | ❌     |
-| Seamonkey       | ✅  | ✅  | ❌     |
-| Torch           | ✅  | ❌   | ❌     |
-| Vivaldi         | ✅    | ✅  | ❌     |
-| Brave           | ✅  | ✅  | ❌     |
-| Avast Browser   | ✅  | ✅  | ❌     |
+| --------------- | ---- | --- | ----- |
+| Google Chrome   | ✅    | ✅  | ✅    |
+| Maxthon         | ❌    | ✅  | ❌     |
+| Microsoft Edge  | ✅    | ✅  | ❌     |
+| Mozilla Firefox | ✅    | ✅  | ✅    |
+| Opera           | ✅    | ✅  | ❌     |
+| Seamonkey       | ✅    | ✅  | ❌     |
+| Torch           | ✅    | ❌   | ❌     |
+| Vivaldi         | ✅      | ✅  | ❌     |
+| Brave           | ✅    | ✅  | ❌     |
+| Avast Browser   | ✅    | ✅  | ❌     |
 
 
 # How to Install
