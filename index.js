@@ -216,7 +216,6 @@ async function getTorchHistory(historyTimeLength = 5) {
  */
 async function getBraveHistory(historyTimeLength = 5) {
     browsers.browserDbLocations.brave = browsers.findPaths(browsers.defaultPaths.brave, browsers.BRAVE);
-    console.log(browsers.browserDbLocations.brave)
     return getBrowserHistory(browsers.browserDbLocations.brave, browsers.BRAVE, historyTimeLength).then(records => {
         return records;
     });
