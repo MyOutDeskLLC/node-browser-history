@@ -230,7 +230,6 @@ async function getSafariHistory(historyTimeLength = 5) {
     browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
     console.log(browsers.browserDbLocations.safari);
     return getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength).then(records => {
-        console.log(records)
         return records;
     });
 }
