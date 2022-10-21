@@ -37,7 +37,7 @@ function setupForMac() {
 function setupForLinux() {
     let defaultPaths = {}
     defaultPaths.firefox = Path.join(homeDirectory, ".mozilla", "firefox");
-    defaultPaths.chrome = Path.join(homeDirectory, ".config", "google-chrome", "Default");
+    defaultPaths.chrome = Path.join(homeDirectory, ".config", "google-chrome");
     return defaultPaths
 }
 
