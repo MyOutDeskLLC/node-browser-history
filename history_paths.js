@@ -25,7 +25,6 @@ function setupForMac() {
     defaultPaths.avast = Path.join(homeDirectory, "Library", "Application Support", "AVAST Software", "Browser");
     defaultPaths.firefox = Path.join(homeDirectory, "Library", "Application Support", "Firefox");
     defaultPaths.edge = Path.join(homeDirectory, "Library", "Application Support", "Microsoft Edge");
-    defaultPaths.safari = Path.join(homeDirectory, "Library", "Safari");
     defaultPaths.opera = Path.join(homeDirectory, "Library", "Application Support", "com.operasoftware.Opera");
     defaultPaths.maxthon = Path.join(homeDirectory, "Library", "Application Support", "com.maxthon.mac.Maxthon");
     defaultPaths.vivaldi = Path.join(homeDirectory, "Library", "Application Support", "Vivaldi");
