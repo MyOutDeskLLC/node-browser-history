@@ -20,18 +20,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MyOutDeskLLC/node-browser-history.git"
+    "url": "https://github.com/pinely-international/chronly-node-browser-history"
   },
   "keywords": [
     "browser",
     "history"
   ],
-  "author": "Lance Thompson",
+  "author": "pinely-international",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/MyOutDeskLLC/node-browser-history/issues"
+    "url": "https://github.com/pinely-international/chronly-node-browser-history/issues"
   },
-  "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
+  "homepage": "https://github.com/pinely-international/chronly-node-browser-history#readme",
   "dependencies": {
     "sqlite-async": "github:tance77/sqlite-async",
     "uuid": "^8.1.0"
