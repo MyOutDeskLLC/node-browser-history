@@ -28,9 +28,6 @@
   ],
   "author": "pinely-international",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/pinely-international/chronly-node-browser-history/issues"
-  },
   "homepage": "https://github.com/pinely-international/chronly-node-browser-history#readme",
   "dependencies": {
     "sqlite-async": "github:tance77/sqlite-async",
