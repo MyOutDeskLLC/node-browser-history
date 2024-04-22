@@ -8,7 +8,6 @@ const CHROME = "Google Chrome",
     OPERA = "Opera",
     SEAMONKEY = "SeaMonkey",
     VIVALDI = "Vivaldi",
-    SAFARI = "Safari",
     MAXTHON = "Maxthon",
     EDGE = "Microsoft Edge",
     BRAVE = "Brave",
@@ -23,7 +22,6 @@ let browserDbLocations = {
     seamonkey: "",
     vivaldi: "",
     maxthon: "",
-    safari: "",
     brave: "",
     avast: ""
 };
@@ -96,8 +94,6 @@ function findPaths(path, browserName) {
         case EDGE:
         case AVAST:
             return findFilesInDir(path, "History", Path.sep + 'History');
-        case SAFARI:
-            return findFilesInDir(path, ".db", Path.sep + 'History.db');
         case MAXTHON:
             return findFilesInDir(path, ".dat", Path.sep + 'History.dat');
         default:
@@ -115,7 +111,6 @@ module.exports = {
     OPERA,
     SEAMONKEY,
     VIVALDI,
-    SAFARI,
     MAXTHON,
     BRAVE,
     EDGE,

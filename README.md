@@ -1,3 +1,11 @@
+# :warning: Deprecation Notice
+
+As of **2023-12-05**, this repository is no longer actively maintained.
+
+## :memo: Details
+
+We regret to announce that we are deprecating this project and will no longer be providing updates. We will be accepting pull requests, but is not activey maintianed, 
+
 # node-browser-history
 
 This module will gather browser history from common internet browsers. Given a time frame.

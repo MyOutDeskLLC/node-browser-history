@@ -48,20 +48,6 @@ function testFireFoxOnly() {
     });
 }
 
-function testSafariOnly() {
-    console.log("***** RUNNING GET SAFARI ONLY *****");
-    return new Promise(res => {
-        history.getSafariHistory(60).then(history => {
-            console.log("PASS GET SAFARI ONLY");
-            console.log(history);
-            res(history);
-        }).catch(error => {
-            console.log("***** FAIL TO GET SAFARI ONLY *****");
-            return Promise.reject(error);
-        });
-    });
-}
-
 function testAvastOnly() {
     console.log("***** RUNNING GET AVAST ONLY *****");
     return new Promise(res => {

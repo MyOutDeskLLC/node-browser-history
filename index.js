@@ -39,9 +39,6 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
 
         case browsers.MAXTHON:
             return await getMaxthonBasedBrowserRecords(paths, browserName, historyTimeLength);
-
-        case browsers.SAFARI:
-            return await getSafariBasedBrowserRecords(paths, browserName, historyTimeLength);
         default:
             return [];
     }
@@ -123,22 +120,6 @@ async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLeng
 
 }
 
-async function getSafariBasedBrowserRecords(paths, browserName, historyTimeLength) {
-    if (!paths || paths.length === 0) {
-        return [];
-    }
-    let newDbPaths = [];
-    let browserHistory = [];
-    for (let i = 0; i < paths.length; i++) {
-        const tmpFilePaths = copyDbAndWalFile(paths[i]);
-        newDbPaths.push(tmpFilePaths.db);
-        let sql = `SELECT i.id, i.url, v.title, v.visit_time as last_visit_time FROM history_items i INNER JOIN history_visits v on i.id = v.history_item WHERE DATETIME (v.visit_time + 978307200, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes')`;
-        await forceWalFileDump(tmpFilePaths.db);
-        browserHistory.push(await getHistoryFromDb(tmpFilePaths.db, sql, browserName));
-    }
-    deleteTempFiles(newDbPaths);
-    return browserHistory;
-}
 
 async function getMaxthonBasedBrowserRecords(paths, browserName, historyTimeLength) {
     let browserHistory = [];
@@ -222,19 +203,6 @@ async function getBraveHistory(historyTimeLength = 5) {
 }
 
 /**
- * Get Safari History
- * @param historyTimeLength time is in minutes
- * @returns {Promise<array>}
- */
-async function getSafariHistory(historyTimeLength = 5) {
-    browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
-    console.log(browsers.browserDbLocations.safari);
-    return getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength).then(records => {
-        return records;
-    });
-}
-
-/**
  * Get Maxthon History
  * @param historyTimeLength time is in minutes
  * @returns {Promise<array>}
@@ -297,7 +265,6 @@ async function getAllHistory(historyTimeLength = 5) {
     browsers.browserDbLocations.opera = browsers.findPaths(browsers.defaultPaths.opera, browsers.OPERA);
     browsers.browserDbLocations.torch = browsers.findPaths(browsers.defaultPaths.torch, browsers.TORCH);
     browsers.browserDbLocations.brave = browsers.findPaths(browsers.defaultPaths.brave, browsers.BRAVE);
-    browsers.browserDbLocations.safari = browsers.findPaths(browsers.defaultPaths.safari, browsers.SAFARI);
     browsers.browserDbLocations.seamonkey = browsers.findPaths(browsers.defaultPaths.seamonkey, browsers.SEAMONKEY);
     browsers.browserDbLocations.maxthon = browsers.findPaths(browsers.defaultPaths.maxthon, browsers.MAXTHON);
     browsers.browserDbLocations.vivaldi = browsers.findPaths(browsers.defaultPaths.vivaldi, browsers.VIVALDI);
@@ -310,7 +277,6 @@ async function getAllHistory(historyTimeLength = 5) {
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.opera, browsers.OPERA, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.torch, browsers.TORCH, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.brave, browsers.BRAVE, historyTimeLength));
-    allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.safari, browsers.SAFARI, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.vivaldi, browsers.VIVALDI, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.seamonkey, browsers.SEAMONKEY, historyTimeLength));
     allBrowserRecords = allBrowserRecords.concat(await getBrowserHistory(browsers.browserDbLocations.maxthon, browsers.MAXTHON, historyTimeLength));
@@ -329,7 +295,6 @@ module.exports = {
     getOperaHistory,
     getTorchHistory,
     getBraveHistory,
-    getSafariHistory,
     getMaxthonHistory,
     getVivaldiHistory,
     getMicrosoftEdge,
