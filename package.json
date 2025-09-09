@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
   "dependencies": {
-    "sqlite-async": "github:tance77/sqlite-async",
+    "sqlite-async": "^1.2.2",
     "uuid": "^8.1.0"
   }
 }
