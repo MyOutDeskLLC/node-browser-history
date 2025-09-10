@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs");
-const Database = require("sqlite-async");
+const { Database } = require("sqlite-async");
 const uuidV4 = require("uuid").v4;
 
 const browsers = require("./browsers");
