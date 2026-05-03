@@ -34,6 +34,6 @@
   "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
   "dependencies": {
     "sqlite-async": "^1.2.2",
-    "uuid": "^8.1.0"
+    "uuid": "^14.0.0"
   }
 }
