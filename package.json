@@ -6,8 +6,8 @@
   "scripts": {
     "test": "node test.js"
   },
-  "engine": {
-    "node": "12"
+  "engines": {
+    "node": ">=22.5.0"
   },
   "build": {
     "extraResources": [],
@@ -33,7 +33,6 @@
   },
   "homepage": "https://github.com/MyOutDeskLLC/node-browser-history#readme",
   "dependencies": {
-    "sqlite-async": "^1.2.2",
     "uuid": "^8.1.0"
   }
 }
