@@ -1,10 +1,12 @@
-# :warning: Deprecation Notice
+# :information_source: Maintenance Status
 
-As of **2023-12-05**, this repository is no longer actively maintained.
+This project is in **low-activity maintenance**. It is stable and still in use, but no new features are planned.
 
 ## :memo: Details
 
-We regret to announce that we are deprecating this project and will no longer be providing updates. We will be accepting pull requests, but is not activey maintianed, 
+We keep the library working: dependency and security updates get applied, and pull requests are reviewed and merged. What we don't do is active feature development or fast turnaround on issues, so expect responses to take a while.
+
+Contributions are welcome — bug fixes and browser support updates especially.
 
 # node-browser-history
 
