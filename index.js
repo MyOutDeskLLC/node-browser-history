@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const { DatabaseSync } = require("node:sqlite");
-const uuidV4 = require("uuid").v4;
+const { randomUUID } = require("node:crypto");
 
 const browsers = require("./browsers");
 const { tmpdir } = require("os");
@@ -60,7 +60,7 @@ async function getHistoryFromDb(dbPath, sql, browserName) {
 }
 
 function copyDbAndWalFile(dbPath, fileExtension = 'sqlite') {
-    const newDbPath = path.join(getTempDir(), uuidV4() + `.${fileExtension}`);
+    const newDbPath = path.join(getTempDir(), randomUUID() + `.${fileExtension}`);
     const filePaths = {};
     filePaths.db = newDbPath;
     filePaths.dbWal = `${newDbPath}-wal`;
@@ -90,7 +90,7 @@ async function getChromeBasedBrowserRecords(paths, browserName, historyTimeLengt
     let newDbPaths = [];
     let browserHistory = [];
     for (let i = 0; i < paths.length; i++) {
-        let newDbPath = path.join(getTempDir(), uuidV4() + ".sqlite");
+        let newDbPath = path.join(getTempDir(), randomUUID() + ".sqlite");
         newDbPaths.push(newDbPath);
         let sql = `SELECT title, datetime(last_visit_time/1000000 + (strftime('%s', '1601-01-01')),'unixepoch') last_visit_time, url from urls WHERE DATETIME (last_visit_time/1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes') group by title, last_visit_time order by last_visit_time`;
         //Assuming the sqlite file is locked so lets make a copy of it
