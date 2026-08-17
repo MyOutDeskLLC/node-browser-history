@@ -46,7 +46,17 @@ async function getBrowserHistory(paths = [], browserName, historyTimeLength) {
 
 async function getHistoryFromDb(dbPath, sql, browserName) {
     const db = new DatabaseSync(dbPath);
-    const rows = db.prepare(sql).all();
+    let rows;
+    try {
+        rows = db.prepare(sql).all();
+    } catch (error) {
+        db.close();
+        // Unused profiles can hold an empty history database with no tables; skip them.
+        if (/no such table/i.test(error.message)) {
+            return [];
+        }
+        throw error;
+    }
     let browserHistory = rows.map(row => {
         return {
             title: row.title,
@@ -109,7 +119,6 @@ async function getMozillaBasedBrowserRecords(paths, browserName, historyTimeLeng
     let browserHistory = [];
     for (let i = 0; i < paths.length; i++) {
         const tmpFilePaths = copyDbAndWalFile(paths[i]);
-        console.log(tmpFilePaths)
         newDbPaths.push(tmpFilePaths.db);
         let sql = `SELECT title, datetime(last_visit_date/1000000,'unixepoch') last_visit_time, url from moz_places WHERE DATETIME (last_visit_date/1000000, 'unixepoch')  >= DATETIME('now', '-${historyTimeLength} minutes')  group by title, last_visit_time order by last_visit_time`;
         await forceWalFileDump(tmpFilePaths.db);
